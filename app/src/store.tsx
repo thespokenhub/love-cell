@@ -15,7 +15,7 @@ function load(): Data {
 }
 
 export type Tab = 'home' | 'mark' | 'care' | 'people' | 'stats';
-export type PeopleFilter = 'all' | 'missing' | 'new' | 'regular' | 'onoff' | 'followup' | 'none' | 'old' | 'leaders' | 'left';
+export type PeopleFilter = 'all' | 'missing' | 'back' | 'once' | 'new' | 'regular' | 'onoff' | 'followup' | 'none' | 'old' | 'leaders' | 'left';
 export type OwnerFilter = 'all' | Owner;
 
 export interface UI {

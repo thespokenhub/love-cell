@@ -29,6 +29,8 @@ function Everyone() {
   const FD: [PeopleFilter, string, PersonView[]][] = [
     ['all', 'Everyone', members(c)],
     ['missing', 'Not seen 3+ weeks', c.people.filter(p => p.flagged)],
+    ['back', 'Came back', firsts.filter(p => p.visits.length > 1)],
+    ['once', 'Came once', firsts.filter(p => p.visits.length === 1)],
     ['new', 'New', by('new')],
     ['regular', 'Coming regularly', by('regular')],
     ['onoff', 'On and off', by('onoff')],

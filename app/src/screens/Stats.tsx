@@ -1,9 +1,9 @@
-import { addDays, fmt, fmtShort } from '../core/dates';
+import { addDays, fmt, fmtShort, weekStart } from '../core/dates';
 import { SVC_NAME } from '../core/rules';
 import type { SvcType } from '../core/types';
 import { cameBackOf, careSummary, firstTimers, pctOf } from '../derive';
 import { useStore } from '../store';
-import { BUCKET, C } from '../theme';
+import { BUCKET, C, OWN } from '../theme';
 import { Header } from '../ui';
 
 const mean = (l: number[]) => (l.length ? Math.round((l.reduce((a, b) => a + b, 0) / l.length) * 10) / 10 : 0);
@@ -39,9 +39,22 @@ export default function Stats() {
   const stopped = people.filter(p => p.left && p.kind !== 'leader');
   const helpers = people.filter(p => p.helper).length;
 
-  const kpi = (label: string, v: string | number) => (
-    <div className="card" style={{ borderRadius: 16, padding: 14 }}><div className="small">{label}</div><div className="big">{v}</div></div>
+  const kpi = (label: string, v: string | number, note: string) => (
+    <div className="card" style={{ borderRadius: 16, padding: 14 }}>
+      <div className="small">{label}</div>
+      <div className="big">{v}</div>
+      <div className="mono" style={{ fontSize: 11, color: C.muted }}>{note}</div>
+    </div>
   );
+  const best = svcs.reduce<(typeof svcs)[number] | null>((b, s) => (!b || sets[s.id].size > sets[b.id].size ? s : b), null);
+  const nOf = (t: SvcType) => svcs.filter(s => s.type === t).length;
+  const plural = (n: number) => `${n} service${n === 1 ? '' : 's'}`;
+  const byOwner = (['Nelson', 'Ella'] as const).map(o => {
+    const l = firsts.filter(p => p.owner === o);
+    return { o, back: cameBackOf(l), of: l.length };
+  });
+  const onceThisWeek = firsts.filter(p => p.visits.length === 1 && weekStart(p.firstVisit!) === weekStart(c.today)).length;
+  const showList = (pf: 'back' | 'once', po: 'all' | 'Nelson' | 'Ella' = 'all') => go('people', { pf, po, pq: '', pv: 'people' });
   const countCard = (title: string, n: number, names: string, onClick?: () => void) => (
     <div onClick={onClick} className={'card pad' + (onClick ? ' tap' : '')} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
@@ -56,10 +69,10 @@ export default function Stats() {
     <div className="page">
       <Header eyebrow="STATS" title="At a glance" sub={`Since ${svcs.length ? fmt(svcs[0].date) : ''} · ${svcs.length} services`} />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: 8 }}>
-        {kpi('Average per service', mean(counts))}
-        {kpi('Biggest service', counts.length ? Math.max(...counts) : 0)}
-        {kpi('MGS average', typeAvg('MGS'))}
-        {kpi('LC Live average', typeAvg('LC'))}
+        {kpi('Average per service', mean(counts), `people, over ${plural(svcs.length)}`)}
+        {kpi('Biggest service', best ? sets[best.id].size : 0, best ? `${SVC_NAME[best.type]} · ${fmt(best.date)}` : '—')}
+        {kpi('MGS average', typeAvg('MGS'), plural(nOf('MGS')))}
+        {kpi('LC Live average', typeAvg('LC'), plural(nOf('LC')))}
       </div>
 
       <div className="card pad" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -97,7 +110,7 @@ export default function Stats() {
           <div className="sub">{cameBack} of {firsts.length} came again ({pctOf(cameBack, firsts.length)}%)</div>
         </div>
         {distRaw.map((d, i) => (
-          <div key={d.label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div key={d.label} onClick={() => showList(i === 0 ? 'once' : 'back')} className="tap" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ width: 104, flex: 'none', fontSize: 13 }}>{d.label}</span>
             <div style={{ flex: 1, height: 14, borderRadius: 4, background: '#F0EFEA', overflow: 'hidden' }}>
               <div style={{ height: 14, borderRadius: 4, background: i === 0 ? C.dashed : C.accent, width: (d.count / dmx) * 100 + '%' }} />
@@ -105,6 +118,23 @@ export default function Stats() {
             <span className="mono" style={{ width: 24, textAlign: 'right', fontSize: 13, fontWeight: 600 }}>{d.count}</span>
           </div>
         ))}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, borderTop: `1px solid ${C.divider}`, paddingTop: 12 }}>
+          {byOwner.map(b => (
+            <div key={b.o} onClick={() => showList('back', b.o)} className="tap">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: C.muted }}><span className="sq" style={{ background: OWN[b.o].solid }} />{OWN[b.o].label} people</div>
+              <div style={{ fontSize: 22, fontWeight: 600, letterSpacing: '-0.02em' }}>{b.back} <span style={{ fontSize: 13, fontWeight: 500, color: C.muted }}>of {b.of} came back</span></div>
+            </div>
+          ))}
+        </div>
+        {onceThisWeek > 0 && (
+          <div className="small" style={{ lineHeight: 1.45 }}>
+            {onceThisWeek} of the {distRaw[0].count} who came once first came this week, so they haven't had a chance to come back yet.
+          </div>
+        )}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <div onClick={() => showList('back')} className="pill-btn outline">See who came back →</div>
+          <div onClick={() => showList('once')} className="pill-btn outline">See who came once →</div>
+        </div>
       </div>
 
       <div className="card pad" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

@@ -98,9 +98,9 @@ export default function Home() {
         <div onClick={showNew} className="tap" style={{ padding: 14, borderRight: `1px solid ${C.line}` }}>
           <div className="small">First-timers</div>
           <div className="big">{firsts.length}</div>
-          <div className="mono" style={{ fontSize: 11, color: C.up }}>+{newWeek} this week</div>
+          <div className="mono" style={{ fontSize: 11, color: C.up }}>{newWeek} of them new this week</div>
         </div>
-        <div style={{ padding: 14, borderRight: `1px solid ${C.line}` }}>
+        <div onClick={() => go('people', { pf: 'back', po: 'all', pq: '', pv: 'people' })} className="tap" style={{ padding: 14, borderRight: `1px solid ${C.line}` }}>
           <div className="small">Came back</div>
           <div className="big">{cameBack}</div>
           <div className="mono" style={{ fontSize: 11, color: C.muted }}>{pctOf(cameBack, firsts.length)}% of them</div>
