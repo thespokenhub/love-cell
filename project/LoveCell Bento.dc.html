@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>body{margin:0} a{color:#6B4EFF} a:hover{color:#4B33D1} input::placeholder{color:#8A8E96} .lcb::-webkit-scrollbar{display:none}</style>
+<script src="./lovecell-core.js"></script>
+</helmet>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+<div style="position:relative;height:874px;display:flex;flex-direction:column;background:#EDEEF1;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#15161A;overflow:hidden;font-variant-numeric:tabular-nums">
+  <div style="height:54px;flex:none"></div>
+  <div ref="{{ scrollRef }}" class="lcb" style="flex:1;overflow-y:auto;scrollbar-width:none;padding-bottom:24px">
+
+    <sc-if value="{{ showHome }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:8px 16px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:12px;padding:0 2px 4px">
+          <div style="flex:1">
+            <div style="font-size:13px;color:#6A6E76;font-weight:600">Love Cell · {{ todayShort }}</div>
+            <div style="font-size:28px;font-weight:800;letter-spacing:-0.02em">Hi, Nelson</div>
+          </div>
+          <div onClick="{{ next.onClick }}" style="width:48px;height:48px;border-radius:24px;background:#15161A;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:500;cursor:pointer">+</div>
+        </div>
+
+        <div onClick="{{ next.onClick }}" style="background:#15161A;color:#FFFFFF;border-radius:24px;padding:12px;display:flex;align-items:center;gap:14px;cursor:pointer">
+          <div style="width:54px;height:58px;border-radius:16px;background:#FFFFFF;color:#15161A;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05">
+            <div style="font-size:11px;font-weight:700;color:#6A6E76;text-transform:uppercase">{{ next.day }}</div>
+            <div style="font-size:22px;font-weight:800">{{ next.num }}</div>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:16px;font-weight:700">{{ next.name }} · next service</div>
+            <div style="font-size:13px;color:#B9BCC4;font-weight:500">{{ next.when }} · tap to take attendance</div>
+          </div>
+          <div style="height:36px;padding:0 14px;border-radius:18px;background:#DCD3FF;color:#15161A;display:flex;align-items:center;font-size:13px;font-weight:800">Start</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+          <div onClick="{{ showNew }}" style="grid-column:span 2;background:#DCD3FF;border-radius:26px;padding:18px;display:flex;gap:12px;cursor:pointer">
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:12px">
+              <div>
+                <div style="font-size:14px;font-weight:700">First-timers</div>
+                <div style="font-size:12px;font-weight:600;color:#3D3470">since {{ startShort }}</div>
+              </div>
+              <div style="font-size:68px;font-weight:800;line-height:.85;letter-spacing:-0.05em">{{ ftTotal }}</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <span style="height:26px;padding:0 10px;border-radius:13px;background:#FFFFFF;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:4px;background:#6B4EFF"></span>{{ ftN }}</span>
+                <span style="height:26px;padding:0 10px;border-radius:13px;background:#FFFFFF;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:4px;background:#0B7A55"></span>{{ ftE }}</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-end;gap:10px">
+              <sc-for list="{{ weeksB }}" as="w" hint-placeholder-count="2">
+                <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+                  <div style="font-size:13px;font-weight:800">{{ w.count }}</div>
+                  <div style="width:38px;display:flex;flex-direction:column;gap:3px">
+                    <div style="height:{{ w.eH }};border-radius:10px;background:#0B7A55"></div>
+                    <div style="height:{{ w.nH }};border-radius:10px;background:#6B4EFF"></div>
+                  </div>
+                  <div style="font-size:11px;font-weight:700;color:#3D3470;white-space:nowrap">{{ w.short }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="background:#CDEFD9;border-radius:26px;padding:16px;display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:14px;font-weight:700">Came back</div>
+            <div style="width:86px;height:86px;border-radius:43px;background:{{ ringBg }};display:flex;align-items:center;justify-content:center">
+              <div style="width:64px;height:64px;border-radius:32px;background:#CDEFD9;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800">{{ cbPct }}</div>
+            </div>
+            <div style="font-size:12px;font-weight:600;color:#1F4D36">{{ cameBack }} of {{ ftTotal }} returned after their first visit</div>
+          </div>
+
+          <div onClick="{{ callAll }}" style="background:#FFDCC7;border-radius:26px;padding:16px;display:flex;flex-direction:column;gap:8px;cursor:pointer">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-size:14px;font-weight:700">To call</div>
+              <div style="width:28px;height:28px;border-radius:14px;background:#15161A;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:14px">↗</div>
+            </div>
+            <div style="font-size:54px;font-weight:800;line-height:.95;letter-spacing:-0.04em">{{ callCount }}</div>
+            <div style="display:flex;align-items:center;padding-left:8px">
+              <sc-for list="{{ callAv }}" as="a" hint-placeholder-count="4">
+                <div style="width:30px;height:30px;margin-left:-8px;border-radius:15px;background:{{ a.bg }};color:{{ a.fg }};border:2px solid #FFDCC7;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">{{ a.initial }}</div>
+              </sc-for>
+              <div style="margin-left:6px;font-size:12px;font-weight:700;color:#6B2F12">{{ callExtra }}</div>
+            </div>
+            <div style="font-size:12px;font-weight:600;color:#6B2F12">Missed the last 2, or away 3+ weeks</div>
+          </div>
+
+          <div style="grid-column:span 2;background:#FFEFA8;border-radius:26px;padding:18px;display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div>
+                <div style="font-size:14px;font-weight:700">Last service</div>
+                <div style="font-size:12px;font-weight:600;color:#5C4A00">{{ lastCard.name }} · {{ lastCard.date }}</div>
+              </div>
+              <div onClick="{{ lastCard.onReport }}" style="height:34px;padding:0 14px;border-radius:17px;background:#15161A;color:#FFFFFF;display:flex;align-items:center;font-size:13px;font-weight:700;cursor:pointer">Report</div>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:10px">
+              <div style="font-size:48px;font-weight:800;line-height:1;letter-spacing:-0.04em">{{ lastCard.count }}</div>
+              <div style="font-size:13px;font-weight:700;color:{{ lastCard.deltaFg }}">{{ lastCard.delta }}</div>
+            </div>
+            <div style="display:flex;gap:3px;height:12px">
+              <div style="height:12px;border-radius:6px;background:#15161A;width:{{ lastCard.lW }}"></div>
+              <div style="height:12px;border-radius:6px;background:#6B4EFF;width:{{ lastCard.nW }}"></div>
+              <div style="height:12px;border-radius:6px;background:#0B7A55;width:{{ lastCard.eW }}"></div>
+            </div>
+            <div style="display:flex;gap:14px;font-size:12px;font-weight:700;flex-wrap:wrap">
+              <span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:4px;background:#15161A"></span>Leaders {{ lastCard.l }}</span>
+              <span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:4px;background:#6B4EFF"></span>Nelson's {{ lastCard.n }}</span>
+              <span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:4px;background:#0B7A55"></span>Ella's {{ lastCard.e }}</span>
+            </div>
+          </div>
+
+          <div style="grid-column:span 2;background:#FFFFFF;border-radius:26px;padding:18px;display:flex;flex-direction:column;gap:14px">
+            <div style="font-size:14px;font-weight:700">People at each service</div>
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px;height:160px">
+              <sc-for list="{{ svcBars }}" as="b" hint-placeholder-count="4">
+                <div onClick="{{ b.onClick }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer">
+                  <div style="height:26px;min-width:30px;padding:0 8px;box-sizing:border-box;border-radius:13px;background:{{ b.bg }};color:{{ b.fg }};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">{{ b.count }}</div>
+                  <div style="width:100%;max-width:46px;height:{{ b.h }};border-radius:14px;background:{{ b.bg }}"></div>
+                  <div style="font-size:11px;font-weight:700;color:#6A6E76;text-align:center;line-height:1.3">{{ b.top }}<br>{{ b.day }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="grid-column:span 2;background:#FFFFFF;border-radius:26px;padding:18px;display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:14px;font-weight:700">How the first-timers are doing</div>
+            <sc-for list="{{ buckets }}" as="k" hint-placeholder-count="4">
+              <div onClick="{{ k.onClick }}" style="display:flex;align-items:center;gap:10px;cursor:pointer">
+                <span style="width:132px;flex:none;font-size:13px;font-weight:600;color:{{ k.fg }}">{{ k.label }}</span>
+                <div style="flex:1;height:10px;border-radius:5px;background:#EDEEF1;overflow:hidden"><div style="height:10px;border-radius:5px;background:{{ k.color }};width:{{ k.w }}"></div></div>
+                <span style="width:24px;text-align:right;font-size:14px;font-weight:800;color:{{ k.fg }}">{{ k.count }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <sc-for list="{{ split }}" as="g" hint-placeholder-count="2">
+            <div onClick="{{ g.onClick }}" style="background:#FFFFFF;border-radius:26px;padding:16px;display:flex;flex-direction:column;gap:6px;cursor:pointer">
+              <div style="align-self:flex-start;height:24px;padding:0 10px;border-radius:12px;background:{{ g.bg }};color:{{ g.fg }};font-size:12px;font-weight:700;display:flex;align-items:center">{{ g.label }}</div>
+              <div style="font-size:34px;font-weight:800;letter-spacing:-0.03em">{{ g.people }}</div>
+              <div style="font-size:12px;color:#6A6E76;font-weight:600;line-height:1.4">{{ g.firsts }} first-timers<br>{{ g.last }} at the last service</div>
+            </div>
+          </sc-for>
+        </div>
+        <div onClick="{{ reset }}" style="font-size:12px;color:#6A6E76;text-align:center;padding:8px;cursor:pointer;text-decoration:underline">Start again from the 4 real services</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showMark }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:8px 0;display:flex;flex-direction:column;gap:12px">
+        <div style="padding:0 18px">
+          <div style="font-size:13px;color:#6A6E76;font-weight:600">Take attendance</div>
+          <div style="font-size:28px;font-weight:800;letter-spacing:-0.02em">{{ cur.name }}</div>
+          <div style="font-size:13px;color:#6A6E76;font-weight:600">{{ cur.long }}</div>
+        </div>
+        <div class="lcb" style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:0 16px">
+          <sc-for list="{{ chips }}" as="h" hint-placeholder-count="5">
+            <div onClick="{{ h.onClick }}" style="flex:none;height:56px;padding:0 14px;box-sizing:border-box;border-radius:18px;background:{{ h.bg }};color:{{ h.fg }};border:{{ h.border }};display:flex;align-items:center;gap:10px;cursor:pointer">
+              <div style="font-size:22px;font-weight:800">{{ h.num }}</div>
+              <div style="display:flex;flex-direction:column;line-height:1.2">
+                <div style="font-size:11px;font-weight:700;color:{{ h.sub }}">{{ h.day }}</div>
+                <div style="font-size:12px;font-weight:700;white-space:nowrap">{{ h.top }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="margin:0 16px;background:#DCD3FF;border-radius:24px;padding:14px;display:flex;flex-direction:column;gap:10px">
+          <div style="font-size:14px;font-weight:700">Someone new today?</div>
+          <input value="{{ newName }}" onChange="{{ onNewName }}" placeholder="Type their name" style="height:48px;border-radius:16px;border:none;background:#FFFFFF;padding:0 14px;font-family:inherit;font-size:16px;color:#15161A;outline:none">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <button onClick="{{ addNelson }}" style="height:46px;border-radius:23px;border:none;background:{{ addNBg }};color:{{ addNFg }};font-family:inherit;font-size:14px;font-weight:700;cursor:pointer">Add to Nelson's</button>
+            <button onClick="{{ addElla }}" style="height:46px;border-radius:23px;border:none;background:{{ addEBg }};color:{{ addEFg }};font-family:inherit;font-size:14px;font-weight:700;cursor:pointer">Add to Ella's</button>
+          </div>
+        </div>
+        <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:#E1E3E8;border-radius:16px;padding:4px">
+            <sc-for list="{{ markFilters }}" as="f" hint-placeholder-count="3">
+              <div onClick="{{ f.onClick }}" style="height:36px;border-radius:12px;background:{{ f.bg }};color:{{ f.fg }};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer">{{ f.label }}</div>
+            </sc-for>
+          </div>
+          <input value="{{ q }}" onChange="{{ onQ }}" placeholder="Find a name" style="height:46px;border-radius:16px;border:none;background:#FFFFFF;padding:0 14px;font-family:inherit;font-size:16px;color:#15161A;outline:none">
+        </div>
+        <sc-for list="{{ markGroups }}" as="g" hint-placeholder-count="3">
+          <div style="margin:0 16px;background:#FFFFFF;border-radius:24px;padding:8px;display:flex;flex-direction:column;gap:2px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;padding:8px 10px 6px">
+              <div style="font-size:14px;font-weight:800">{{ g.title }}</div>
+              <div style="font-size:12px;color:#6A6E76;font-weight:600">{{ g.here }}</div>
+            </div>
+            <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="8">
+              <div onClick="{{ r.onToggle }}" style="display:flex;align-items:center;gap:12px;padding:8px 10px;min-height:52px;box-sizing:border-box;border-radius:16px;cursor:pointer;user-select:none">
+                <div style="width:40px;height:40px;flex:none;border-radius:20px;background:#EDEEF1;color:#15161A;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800">{{ r.initial }}</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:15px;font-weight:700">{{ r.name }}</div>
+                  <div style="font-size:12px;color:#6A6E76;font-weight:600">{{ r.sub }}</div>
+                </div>
+                <div style="width:30px;height:30px;flex:none;box-sizing:border-box;border-radius:10px;border:2px solid {{ r.dotBorder }};background:{{ r.dotBg }};color:{{ r.checkFg }};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800">{{ r.check }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showPeople }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:8px 16px;display:flex;flex-direction:column;gap:10px">
+        <div style="padding:0 2px">
+          <div style="font-size:28px;font-weight:800;letter-spacing:-0.02em">People</div>
+          <div style="font-size:13px;color:#6A6E76;font-weight:600">{{ peopleSub }}</div>
+        </div>
+        <input value="{{ pq }}" onChange="{{ onPQ }}" placeholder="Find a name" style="height:46px;border-radius:16px;border:none;background:#FFFFFF;padding:0 14px;font-family:inherit;font-size:16px;color:#15161A;outline:none">
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:#E1E3E8;border-radius:16px;padding:4px">
+          <sc-for list="{{ ownerFilters }}" as="f" hint-placeholder-count="3">
+            <div onClick="{{ f.onClick }}" style="height:36px;border-radius:12px;background:{{ f.bg }};color:{{ f.fg }};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer">{{ f.label }}</div>
+          </sc-for>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <sc-for list="{{ peopleFilters }}" as="f" hint-placeholder-count="5">
+            <div onClick="{{ f.onClick }}" style="height:34px;padding:0 12px;border-radius:17px;background:{{ f.bg }};color:{{ f.fg }};border:1px solid {{ f.border }};display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;cursor:pointer">{{ f.label }}<span style="font-weight:800">{{ f.count }}</span></div>
+          </sc-for>
+        </div>
+        <div style="background:#FFFFFF;border-radius:24px;padding:6px;display:flex;flex-direction:column">
+          <sc-for list="{{ prows }}" as="p" hint-placeholder-count="8">
+            <div onClick="{{ p.onClick }}" style="display:flex;gap:12px;align-items:center;padding:10px;border-radius:16px;cursor:pointer">
+              <div style="width:42px;height:42px;flex:none;border-radius:21px;background:{{ p.ownerBg }};color:{{ p.ownerFg }};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px">{{ p.initial }}</div>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+                <div style="display:flex;align-items:center;gap:8px;min-width:0">
+                  <span style="font-size:15px;font-weight:700">{{ p.name }}</span>
+                  <sc-if value="{{ p.flag }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:700;color:#B3261E;background:#FFDCD6;border-radius:8px;padding:2px 7px;white-space:nowrap">{{ p.flagText }}</span></sc-if>
+                </div>
+                <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                  <span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:{{ p.stBg }};color:{{ p.stFg }}">{{ p.label }}</span>
+                </div>
+              </div>
+              <div style="text-align:right;flex:none">
+                <div style="font-size:16px;font-weight:800">{{ p.attShort }}</div>
+                <div style="font-size:11px;color:#6A6E76;font-weight:600">seen {{ p.seen }}</div>
+              </div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ noPeople }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:30px 10px;text-align:center;color:#6A6E76;font-size:14px">Nobody here.</div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+
+  <sc-if value="{{ showMarkBar }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:none;display:flex;align-items:center;gap:12px;padding:10px 16px;background:#FFFFFF;border-top:1px solid #E3E5EA">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:20px;font-weight:800">{{ curCount }} here</div>
+        <div style="font-size:12px;color:#6A6E76;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ barSub }}</div>
+      </div>
+      <button onClick="{{ openReport }}" style="height:48px;padding:0 20px;border-radius:24px;border:none;background:#15161A;color:#FFFFFF;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer">Generate report</button>
+    </div>
+  </sc-if>
+
+  <div style="flex:none;display:flex;gap:6px;background:#FFFFFF;border-top:1px solid #E3E5EA;padding:8px 14px 30px">
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+      <div onClick="{{ t.onClick }}" style="flex:1;height:44px;border-radius:22px;background:{{ t.bg }};color:{{ t.fg }};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;cursor:pointer">{{ t.label }}</div>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{ hasPerson }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:30;background:#EDEEF1;display:flex;flex-direction:column">
+      <div style="height:54px;flex:none"></div>
+      <div style="flex:none;padding:4px 16px;display:flex;align-items:center;justify-content:space-between">
+        <div onClick="{{ closePerson }}" style="width:44px;height:44px;border-radius:22px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;cursor:pointer">‹</div>
+        <div style="font-size:14px;font-weight:700;color:#6A6E76">Person</div>
+        <div style="width:44px"></div>
+      </div>
+      <div class="lcb" style="flex:1;overflow-y:auto;scrollbar-width:none;padding:8px 16px 40px;display:flex;flex-direction:column;gap:10px">
+        <div style="background:#FFFFFF;border-radius:26px;padding:18px;display:flex;align-items:center;gap:14px">
+          <div style="width:64px;height:64px;flex:none;border-radius:32px;background:{{ person.solid }};color:{{ person.onSolid }};display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800">{{ person.initial }}</div>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+            <div style="font-size:22px;font-weight:800;letter-spacing:-0.02em">{{ person.name }}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:{{ person.ownerBg }};color:{{ person.ownerFg }}">{{ person.ownerLabel }}</span>
+              <span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:{{ person.stBg }};color:{{ person.stFg }}">{{ person.label }}</span>
+            </div>
+          </div>
+        </div>
+        <div style="background:#DCD3FF;border-radius:26px;padding:18px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:baseline;gap:10px">
+            <div style="font-size:40px;font-weight:800;letter-spacing:-0.03em;line-height:1">{{ person.attBig }}</div>
+            <div style="font-size:13px;color:#3D3470;font-weight:600">{{ person.attSmall }}</div>
+          </div>
+          <sc-if value="{{ person.isNew }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px">
+                <sc-for list="{{ person.segs }}" as="s" hint-placeholder-count="8">
+                  <div style="height:28px;border-radius:9px;background:{{ s.bg }};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#FFFFFF">{{ s.label }}</div>
+                </sc-for>
+              </div>
+              <div style="font-size:12px;color:#3D3470;font-weight:600">{{ person.weekText }}</div>
+            </div>
+          </sc-if>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="background:#FFFFFF;border-radius:20px;padding:14px"><div style="font-size:11px;color:#6A6E76;font-weight:700">First visit</div><div style="font-size:13px;font-weight:700;margin-top:3px">{{ person.first }}</div></div>
+          <div style="background:#FFFFFF;border-radius:20px;padding:14px"><div style="font-size:11px;color:#6A6E76;font-weight:700">Last seen</div><div style="font-size:13px;font-weight:700;margin-top:3px">{{ person.last }}</div></div>
+        </div>
+        <sc-if value="{{ person.flag }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#FFDCC7;color:#6B2F12;border-radius:20px;padding:14px 16px;font-size:14px;font-weight:700">{{ person.flagText }}</div>
+        </sc-if>
+        <div style="background:#FFFFFF;border-radius:24px;padding:6px 16px">
+          <sc-for list="{{ person.history }}" as="h" hint-placeholder-count="4">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid {{ h.line }};font-size:14px;font-weight:600">
+              <span>{{ h.label }}</span>
+              <span style="font-weight:800;color:{{ h.fg }}">{{ h.mark }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ person.canEdit }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:8px;padding-top:4px">
+            <div style="font-size:13px;font-weight:700;color:#6A6E76">Fix a mistake</div>
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));background:#E1E3E8;border-radius:16px;padding:4px">
+              <sc-for list="{{ person.ownerOpts }}" as="o" hint-placeholder-count="2">
+                <div onClick="{{ o.onClick }}" style="height:36px;border-radius:12px;background:{{ o.bg }};color:{{ o.fg }};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer">{{ o.label }}</div>
+              </sc-for>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));background:#E1E3E8;border-radius:16px;padding:4px">
+              <sc-for list="{{ person.kindOpts }}" as="o" hint-placeholder-count="2">
+                <div onClick="{{ o.onClick }}" style="height:36px;border-radius:12px;background:{{ o.bg }};color:{{ o.fg }};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer">{{ o.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ hasReport }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:40;background:rgba(21,22,26,0.45);display:flex;flex-direction:column;justify-content:flex-end">
+      <div onClick="{{ closeReport }}" style="flex:1;min-height:80px"></div>
+      <div style="background:#FFFFFF;border-radius:30px 30px 0 0;padding:10px 18px 34px;display:flex;flex-direction:column;gap:14px">
+        <div style="width:40px;height:5px;border-radius:3px;background:#D5D8DE;align-self:center"></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end">
+          <div>
+            <div style="font-size:24px;font-weight:800">Report</div>
+            <div style="font-size:13px;color:#6A6E76;font-weight:600">{{ report.title }}</div>
+          </div>
+          <div style="height:30px;padding:0 12px;border-radius:15px;background:#FFEFA8;display:flex;align-items:center;font-size:13px;font-weight:800">{{ report.count }} here</div>
+        </div>
+        <div class="lcb" style="max-height:420px;overflow-y:auto;scrollbar-width:none;background:#EDEEF1;border-radius:18px;padding:16px;font-size:14px;line-height:1.55;white-space:pre-wrap;font-weight:500">{{ report.text }}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <button onClick="{{ copyReport }}" style="height:52px;border-radius:26px;border:none;background:#15161A;color:#FFFFFF;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer">{{ copyLabel }}</button>
+          <a href="{{ report.wa }}" target="_blank" style="height:52px;border-radius:26px;background:#CDEFD9;color:#15161A;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;text-decoration:none">Send on WhatsApp</a>
+        </div>
+        <div onClick="{{ closeReport }}" style="text-align:center;font-size:14px;font-weight:700;color:#6A6E76;cursor:pointer;padding:4px">Close</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:16px;right:16px;bottom:170px;z-index:50;background:#15161A;color:#FFFFFF;border-radius:18px;padding:14px 16px;font-size:14px;font-weight:600;text-align:center">{{ toast }}</div>
+  </sc-if>
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:402,&quot;height&quot;:874},&quot;pretendToday&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;2026-10-23&quot;,&quot;2026-11-01&quot;,&quot;2026-12-13&quot;],&quot;default&quot;:&quot;2026-10-23&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const THEME={
+  ink:'#15161A',muted:'#6A6E76',line:'#E3E5EA',faint:'#C9CCD3',up:'#0B7A55',down:'#C2341F',
+  own:{Nelson:{label:"Nelson's",bg:'#E6E0FF',fg:'#4B33D1',solid:'#6B4EFF',onSolid:'#FFFFFF'},Ella:{label:"Ella's",bg:'#D3F1E3',fg:'#0B6A4A',solid:'#0B7A55',onSolid:'#FFFFFF'}},
+  lead:{label:'Leader',bg:'#E3E5EA',fg:'#15161A',solid:'#15161A',onSolid:'#FFFFFF'},
+  st:{new:{bg:'#EEF0F3',fg:'#3A3D44'},regular:{bg:'#D3F1E3',fg:'#0B6A4A'},onoff:{bg:'#FFEFC2',fg:'#7A5300'},followup:{bg:'#FFDCD6',fg:'#B3261E'},old:{bg:'#DDEBFF',fg:'#1D4FB8'},leader:{bg:'#15161A',fg:'#FFFFFF'},none:{bg:'#EEF0F3',fg:'#6A6E76'}},
+  bucket:{new:'#B8BBC4',regular:'#0B7A55',onoff:'#F2B544',followup:'#E5533C'},
+  barOn:'#6B4EFF',barOnFg:'#FFFFFF',barIdle:'#E6E0FF',barIdleFg:'#15161A',barH:100,weekH:84,
+  ring:'#0B7A55',ringTrack:'rgba(255,255,255,0.75)',segFill:'#6B4EFF',segEmpty:'rgba(255,255,255,0.7)',pipeOn:'#6B4EFF',pipeOff:'#E3E5EA',
+  chipSelBg:'#15161A',chipSelFg:'#FFFFFF',chipBg:'#FFFFFF',chipNewBorder:'#A9ADB6',
+  dotOff:'#C9CCD3',rowOn:'#FFFFFF',rowOff:'transparent',rowOnBorder:'#E3E5EA',rowOffBorder:'transparent',
+  segOn:'#FFFFFF',segOnFg:'#15161A',filterOnBg:'#15161A',filterOnFg:'#FFFFFF',filterOffBg:'#FFFFFF',callBg:'#C2341F',callFg:'#FFFFFF',
+  histOn:'#0B7A55',histOff:'#8A8E96',tabOnBg:'#15161A',tabOnFg:'#FFFFFF',tabOnBar:'#15161A',tabOff:'#6A6E76',avRing:'#FFFFFF'
+};
+class Component extends DCLogic {
+  state=Object.assign({S:null},window.LoveCore?window.LoveCore.initialState():{tab:'home'});
+  scrollRef=React.createRef();
+  componentDidMount(){const boot=()=>{if(!window.LoveCore){this._b=setTimeout(boot,40);return;}this.setState(window.LoveCore.initialState());window.LoveCore.mount(this,'lovecell-v2-bento');};boot();}
+  componentWillUnmount(){clearTimeout(this._b);clearTimeout(this._t);}
+  renderVals(){return window.LoveCore&&this.state.S?window.LoveCore.vals(this,THEME):{scrollRef:this.scrollRef,tabs:[],showHome:true};}
+}
+</script>
+</body>
+</html>

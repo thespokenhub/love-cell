@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+<style>body{margin:0} a{color:#A8253A} a:hover{color:#7E1A2C} input::placeholder{color:#8F8279} .lc-scroll::-webkit-scrollbar{display:none}</style>
+</helmet>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+<div style="position:relative;height:874px;display:flex;flex-direction:column;background:#F6F1EA;font-family:'Hanken Grotesk',system-ui,sans-serif;color:#231B17;overflow:hidden">
+  <div style="height:54px;flex:none;background:#F6F1EA"></div>
+  <div ref="{{ scrollRef }}" class="lc-scroll" style="flex:1;overflow-y:auto;scrollbar-width:none;padding-bottom:24px">
+
+    <sc-if value="{{ showHomeA }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:6px 20px 8px;display:flex;flex-direction:column;gap:18px">
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <div style="font-size:13px;font-weight:700;letter-spacing:.12em;color:#A8253A">LOVE CELL</div>
+          <div style="font-family:'Instrument Serif',serif;font-size:40px;line-height:1.05">Hello, Nelson</div>
+          <div style="font-size:15px;color:#6E625A">{{ todayLong }}</div>
+        </div>
+        <div style="background:#A8253A;color:#FFFFFF;border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:600;color:#FBE3E6">
+            <div style="letter-spacing:.08em;text-transform:uppercase">Next service</div>
+            <div>{{ next.when }}</div>
+          </div>
+          <div style="font-family:'Instrument Serif',serif;font-size:34px;line-height:1.05">{{ next.name }}<br>{{ next.long }}</div>
+          <button onClick="{{ next.onClick }}" style="height:52px;border-radius:26px;border:none;background:#FFFFFF;color:#A8253A;font-family:inherit;font-size:17px;font-weight:700;cursor:pointer">Take attendance</button>
+        </div>
+        <div style="background:#FFFFFF;border-radius:24px;padding:18px 18px 6px;display:flex;flex-direction:column;border:1px solid #EDE4DA">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:20px;font-weight:700">Call this week</div>
+            <div style="min-width:32px;height:32px;padding:0 10px;box-sizing:border-box;border-radius:16px;background:#F9DEDA;color:#9C2418;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center">{{ callCount }}</div>
+          </div>
+          <div style="font-size:14px;color:#6E625A;margin:4px 0 10px;text-wrap:pretty">Missed the last 2 services, or not seen for 3+ weeks.</div>
+          <sc-for list="{{ callTop }}" as="c" hint-placeholder-count="5">
+            <div onClick="{{ c.onClick }}" style="display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid #F0E8DF;cursor:pointer">
+              <div style="width:38px;height:38px;flex:none;border-radius:19px;background:{{ c.ownerBg }};color:{{ c.ownerFg }};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px">{{ c.initial }}</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:16px;font-weight:600">{{ c.name }}</div>
+                <div style="font-size:13px;color:#6E625A">{{ c.reason }} · {{ c.ownerLabel }}</div>
+              </div>
+              <div style="font-size:13px;color:#6E625A;text-align:right">{{ c.seen }}</div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ noCall }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:12px 0 14px;border-top:1px solid #F0E8DF;font-size:15px;color:#1F6234">Everyone has been around lately. Nobody to chase.</div>
+          </sc-if>
+          <sc-if value="{{ callMore }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ callAll }}" style="padding:14px 0;border-top:1px solid #F0E8DF;font-size:15px;font-weight:700;color:#A8253A;cursor:pointer">See all {{ callCount }}</div>
+          </sc-if>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+          <div onClick="{{ showNew }}" style="background:#FFFFFF;border:1px solid #EDE4DA;border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:4px;cursor:pointer">
+            <div style="font-family:'Instrument Serif',serif;font-size:38px;line-height:1">{{ ftTotal }}</div>
+            <div style="font-size:13px;color:#6E625A;line-height:1.3">first-timers since {{ startShort }}</div>
+          </div>
+          <div style="background:#FFFFFF;border:1px solid #EDE4DA;border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:4px">
+            <div style="font-family:'Instrument Serif',serif;font-size:38px;line-height:1">{{ newWeek }}</div>
+            <div style="font-size:13px;color:#6E625A;line-height:1.3">new this week ({{ newWeekSplit }})</div>
+          </div>
+          <div style="background:#FFFFFF;border:1px solid #EDE4DA;border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:4px">
+            <div style="font-family:'Instrument Serif',serif;font-size:38px;line-height:1">{{ cameBack }}</div>
+            <div style="font-size:13px;color:#6E625A;line-height:1.3">came back after their first visit</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:20px;font-weight:700">Recent services</div>
+          <sc-for list="{{ recent }}" as="s" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:12px;background:#FFFFFF;border:1px solid #EDE4DA;border-radius:18px;padding:12px 14px">
+              <div onClick="{{ s.onOpen }}" style="flex:1;min-width:0;cursor:pointer;display:flex;flex-direction:column;gap:6px">
+                <div style="display:flex;justify-content:space-between;align-items:baseline">
+                  <div style="font-size:16px;font-weight:600">{{ s.name }}</div>
+                  <div style="font-size:16px;font-weight:700">{{ s.count }}</div>
+                </div>
+                <div style="height:6px;border-radius:3px;background:#F0E8DF;overflow:hidden"><div style="height:6px;border-radius:3px;background:#A8253A;width:{{ s.w }}"></div></div>
+                <div style="font-size:13px;color:#6E625A">{{ s.newLine }}</div>
+              </div>
+              <button onClick="{{ s.onReport }}" style="height:36px;padding:0 14px;border-radius:18px;border:1px solid #DCCFC2;background:#FFFFFF;color:#231B17;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">Report</button>
+            </div>
+          </sc-for>
+        </div>
+        <div onClick="{{ reset }}" style="font-size:13px;color:#6E625A;text-align:center;padding:8px;cursor:pointer;text-decoration:underline">Start again from the 4 real services</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showHomeB }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:6px 20px 8px;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <div style="font-size:13px;font-weight:700;letter-spacing:.12em;color:#A8253A">LOVE CELL</div>
+          <div style="font-family:'Instrument Serif',serif;font-size:40px;line-height:1.05">How we're growing</div>
+          <div style="font-size:15px;color:#6E625A">{{ todayLong }}</div>
+        </div>
+        <button onClick="{{ next.onClick }}" style="height:56px;border-radius:28px;border:none;background:#A8253A;color:#FFFFFF;font-family:inherit;font-size:17px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">Take attendance · {{ next.name }}, {{ next.short }}</button>
+        <div onClick="{{ showNew }}" style="background:#FFFFFF;border:1px solid #EDE4DA;border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:14px;cursor:pointer">
+          <div style="display:flex;align-items:flex-end;gap:14px">
+            <div style="font-family:'Instrument Serif',serif;font-size:76px;line-height:.85;color:#A8253A">{{ ftTotal }}</div>
+            <div style="display:flex;flex-direction:column;gap:2px;padding-bottom:4px">
+              <div style="font-size:17px;font-weight:700">first-timers</div>
+              <div style="font-size:14px;color:#6E625A">since {{ startLong }}</div>
+            </div>
+          </div>
+          <sc-for list="{{ weeksB }}" as="w" hint-placeholder-count="2">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;justify-content:space-between;font-size:14px"><span style="color:#4A3F38;font-weight:600">{{ w.label }}</span><span style="font-weight:700">{{ w.count }} people</span></div>
+              <div style="display:flex;height:12px;border-radius:6px;background:#F0E8DF;overflow:hidden">
+                <div style="height:12px;background:#A8253A;width:{{ w.nW }}"></div>
+                <div style="height:12px;background:#1F6F68;width:{{ w.eW }}"></div>
+              </div>
+            </div>
+          </sc-for>
+          <div style="display:flex;gap:16px;font-size:13px;color:#4A3F38">
+            <div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:5px;background:#A8253A"></span>Nelson's {{ ftN }}</div>
+            <div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:5px;background:#1F6F68"></span>Ella's {{ ftE }}</div>
+          </div>
+        </div>
+        <div style="background:#FFFFFF;border:1px solid #EDE4DA;border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:14px">
+          <div style="font-size:18px;font-weight:700">People at each service</div>
+          <div style="display:flex;align-items:flex-end;gap:12px;height:190px">
+            <sc-for list="{{ svcBars }}" as="b" hint-placeholder-count="4">
+              <div onClick="{{ b.onClick }}" style="flex:1;display:flex;flex-direction:column;align-items:stretch;gap:4px;cursor:pointer">
+                <div style="text-align:center;font-size:16px;font-weight:700">{{ b.count }}</div>
+                <div style="display:flex;flex-direction:column;border-radius:8px;overflow:hidden">
+                  <div style="height:{{ b.hE }};background:#1F6F68"></div>
+                  <div style="height:{{ b.hN }};background:#A8253A"></div>
+                  <div style="height:{{ b.hL }};background:#231B17"></div>
+                </div>
+                <div style="text-align:center;font-size:12px;color:#4A3F38;line-height:1.25"><b>{{ b.top }}</b><br>{{ b.date }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:14px;font-size:13px;color:#4A3F38;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:5px;background:#231B17"></span>Leaders</div>
+            <div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:5px;background:#A8253A"></span>Nelson's</div>
+            <div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:5px;background:#1F6F68"></span>Ella's</div>
+          </div>
+        </div>
+        <div style="background:#FFFFFF;border:1px solid #EDE4DA;border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:12px">
+          <div style="font-size:18px;font-weight:700">How the first-timers are doing</div>
+          <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;background:#F0E8DF">
+            <sc-for list="{{ buckets }}" as="k" hint-placeholder-count="4">
+              <div style="height:14px;background:{{ k.color }};width:{{ k.w }}"></div>
+            </sc-for>
+          </div>
+          <sc-for list="{{ buckets }}" as="k" hint-placeholder-count="4">
+            <div onClick="{{ k.onClick }}" style="display:flex;align-items:center;gap:10px;font-size:15px;cursor:pointer">
+              <span style="width:12px;height:12px;border-radius:6px;background:{{ k.color }};flex:none"></span>
+              <span style="flex:1;color:{{ k.fg }}">{{ k.label }}</span>
+              <span style="font-weight:700;color:{{ k.fg }}">{{ k.count }}</span>
+            </div>
+          </sc-for>
+          <div style="border-top:1px solid #F0E8DF;padding-top:12px;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;justify-content:space-between;font-size:15px"><span>Came back after their first visit</span><b>{{ cameBack }} of {{ ftTotal }}</b></div>
+            <div style="height:8px;border-radius:4px;background:#F0E8DF;overflow:hidden"><div style="height:8px;background:#2E7D45;width:{{ cameBackW }}"></div></div>
+          </div>
+        </div>
+        <div onClick="{{ callAll }}" style="background:#F9DEDA;border-radius:24px;padding:18px;display:flex;align-items:center;gap:14px;cursor:pointer">
+          <div style="font-family:'Instrument Serif',serif;font-size:48px;line-height:1;color:#9C2418">{{ callCount }}</div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+            <div style="font-size:16px;font-weight:700;color:#7A1C12">to call this week</div>
+            <div style="font-size:13px;color:#7A1C12">Missed the last 2 services, or not seen for 3+ weeks</div>
+          </div>
+          <div style="font-size:15px;font-weight:700;color:#7A1C12">See who</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+          <sc-for list="{{ split }}" as="g" hint-placeholder-count="2">
+            <div onClick="{{ g.onClick }}" style="background:#FFFFFF;border:1px solid #EDE4DA;border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:8px;cursor:pointer">
+              <div style="display:inline-flex;align-self:flex-start;padding:3px 10px;border-radius:999px;background:{{ g.bg }};color:{{ g.fg }};font-size:13px;font-weight:700">{{ g.label }}</div>
+              <div style="font-family:'Instrument Serif',serif;font-size:36px;line-height:1">{{ g.people }}</div>
+              <div style="font-size:13px;color:#6E625A;line-height:1.35">people · {{ g.firsts }} first-timers<br>{{ g.last }} at the last service</div>
+            </div>
+          </sc-for>
+        </div>
+        <div onClick="{{ reset }}" style="font-size:13px;color:#6E625A;text-align:center;padding:8px;cursor:pointer;text-decoration:underline">Start again from the 4 real services</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showHomeC }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column">
+        <div style="padding:6px 20px 12px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div style="font-size:13px;font-weight:700;letter-spacing:.12em;color:#A8253A">LOVE CELL</div>
+            <div style="font-family:'Instrument Serif',serif;font-size:40px;line-height:1.05">Register</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+            <div style="background:#FFFFFF;border:1px solid #EDE4DA;border-radius:16px;padding:10px 12px">
+              <div style="font-family:'Instrument Serif',serif;font-size:30px;line-height:1">{{ ftTotal }}</div>
+              <div style="font-size:12px;color:#6E625A">first-timers</div>
+            </div>
+            <div style="background:#FFFFFF;border:1px solid #EDE4DA;border-radius:16px;padding:10px 12px">
+              <div style="font-family:'Instrument Serif',serif;font-size:30px;line-height:1">{{ newWeek }}</div>
+              <div style="font-size:12px;color:#6E625A">new this week</div>
+            </div>
+            <div onClick="{{ callAll }}" style="background:#F9DEDA;border-radius:16px;padding:10px 12px;cursor:pointer">
+              <div style="font-family:'Instrument Serif',serif;font-size:30px;line-height:1;color:#9C2418">{{ callCount }}</div>
+              <div style="font-size:12px;color:#7A1C12">to call ›</div>
+            </div>
+          </div>
+          <div style="font-size:13px;color:#6E625A">Tap a date to pick the service. Tap a box to mark someone. Red dot = call them.</div>
+        </div>
+        <div style="position:sticky;top:0;z-index:5;background:#F6F1EA;border-bottom:1px solid #E7DDD2;display:grid;grid-template-columns:minmax(0,1fr) repeat(5,38px);gap:6px;padding:8px 16px;align-items:end">
+          <div style="font-size:13px;font-weight:600;color:#6E625A">Name</div>
+          <sc-for list="{{ cols }}" as="h" hint-placeholder-count="5">
+            <div onClick="{{ h.onClick }}" style="height:46px;border-radius:12px;background:{{ h.bg }};color:{{ h.fg }};border:{{ h.border }};box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;line-height:1.1">
+              <div style="font-size:11px;font-weight:600">{{ h.top }}</div>
+              <div style="font-size:16px;font-weight:700">{{ h.num }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <sc-for list="{{ regGroups }}" as="g" hint-placeholder-count="3">
+          <div style="display:flex;flex-direction:column">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;padding:16px 16px 6px">
+              <div style="font-size:15px;font-weight:700;color:{{ g.color }}">{{ g.title }}</div>
+              <div style="font-size:13px;color:#6E625A">{{ g.here }}</div>
+            </div>
+            <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="6">
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) repeat(5,38px);gap:6px;padding:4px 16px;align-items:center;min-height:46px">
+                <div onClick="{{ r.onOpen }}" style="min-width:0;cursor:pointer;display:flex;flex-direction:column">
+                  <div style="display:flex;align-items:center;gap:6px;min-width:0">
+                    <span style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span>
+                    <sc-if value="{{ r.flag }}" hint-placeholder-val="{{ false }}"><span style="width:8px;height:8px;border-radius:4px;background:#C2412F;flex:none"></span></sc-if>
+                  </div>
+                  <div style="font-size:12px;color:{{ r.labelFg }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.label }}</div>
+                </div>
+                <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="5">
+                  <div onClick="{{ c.onClick }}" style="width:38px;height:38px;border-radius:11px;box-sizing:border-box;background:{{ c.bg }};border:{{ c.border }};color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;cursor:pointer;user-select:none">{{ c.mark }}</div>
+                </sc-for>
+              </div>
+            </sc-for>
+            <sc-if value="{{ g.canAdd }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;gap:8px;padding:8px 16px 4px">
+                <input value="{{ g.val }}" onChange="{{ g.onInput }}" placeholder="New person's name" style="flex:1;min-width:0;height:44px;border-radius:12px;border:1px dashed #CDBFB2;background:#FFFFFF;padding:0 12px;font-family:inherit;font-size:15px;color:#231B17;outline:none">
+                <button onClick="{{ g.onAdd }}" style="height:44px;padding:0 14px;border-radius:12px;border:none;background:{{ g.btnBg }};color:#FFFFFF;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap">{{ g.addLabel }}</button>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+        <div onClick="{{ reset }}" style="font-size:13px;color:#6E625A;text-align:center;padding:20px 8px 8px;cursor:pointer;text-decoration:underline">Start again from the 4 real services</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showMark }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:6px 0 8px;display:flex;flex-direction:column;gap:14px">
+        <div style="padding:0 20px;display:flex;flex-direction:column;gap:2px">
+          <div style="font-size:13px;font-weight:700;letter-spacing:.12em;color:#A8253A">TAKE ATTENDANCE</div>
+          <div style="font-family:'Instrument Serif',serif;font-size:40px;line-height:1.05">{{ cur.name }}</div>
+          <div style="font-size:15px;color:#6E625A">{{ cur.long }}</div>
+        </div>
+        <div class="lc-scroll" style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:0 20px">
+          <sc-for list="{{ chips }}" as="h" hint-placeholder-count="5">
+            <div onClick="{{ h.onClick }}" style="flex:none;padding:8px 14px;border-radius:14px;background:{{ h.bg }};color:{{ h.fg }};border:{{ h.border }};cursor:pointer;display:flex;flex-direction:column;gap:1px">
+              <div style="font-size:12px;font-weight:600">{{ h.top }}</div>
+              <div style="font-size:15px;font-weight:700;white-space:nowrap">{{ h.label }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="margin:0 20px;background:#FFFFFF;border:1px solid #EDE4DA;border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:10px">
+          <div style="font-size:15px;font-weight:700">Someone new today?</div>
+          <input value="{{ newName }}" onChange="{{ onNewName }}" placeholder="Type their name" style="height:46px;border-radius:12px;border:1px solid #DCCFC2;background:#FBF8F4;padding:0 14px;font-family:inherit;font-size:16px;color:#231B17;outline:none">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <button onClick="{{ addNelson }}" style="height:46px;border-radius:23px;border:none;background:{{ addNBg }};color:{{ addFg }};font-family:inherit;font-size:15px;font-weight:700;cursor:pointer">Add to Nelson's</button>
+            <button onClick="{{ addElla }}" style="height:46px;border-radius:23px;border:none;background:{{ addEBg }};color:{{ addFg }};font-family:inherit;font-size:15px;font-weight:700;cursor:pointer">Add to Ella's</button>
+          </div>
+        </div>
+        <div style="padding:0 20px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:#EAE2D8;border-radius:14px;padding:3px">
+            <sc-for list="{{ markFilters }}" as="f" hint-placeholder-count="3">
+              <div onClick="{{ f.onClick }}" style="height:38px;border-radius:11px;background:{{ f.bg }};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;cursor:pointer;color:#231B17">{{ f.label }}</div>
+            </sc-for>
+          </div>
+          <input value="{{ q }}" onChange="{{ onQ }}" placeholder="Find a name" style="height:44px;border-radius:12px;border:1px solid #DCCFC2;background:#FFFFFF;padding:0 14px;font-family:inherit;font-size:16px;color:#231B17;outline:none">
+        </div>
+        <sc-for list="{{ markGroups }}" as="g" hint-placeholder-count="3">
+          <div style="display:flex;flex-direction:column;gap:2px;padding:0 10px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;padding:8px 10px 4px">
+              <div style="font-size:15px;font-weight:700">{{ g.title }}</div>
+              <div style="font-size:13px;color:#6E625A">{{ g.here }}</div>
+            </div>
+            <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="8">
+              <div onClick="{{ r.onToggle }}" style="display:flex;align-items:center;gap:14px;padding:8px 10px;min-height:52px;border-radius:16px;background:{{ r.rowBg }};cursor:pointer;user-select:none">
+                <div style="width:30px;height:30px;flex:none;box-sizing:border-box;border-radius:15px;border:2px solid {{ r.dotBorder }};background:{{ r.dotBg }};color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700">{{ r.check }}</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:16px;font-weight:600">{{ r.name }}</div>
+                  <div style="font-size:13px;color:#6E625A">{{ r.sub }}</div>
+                </div>
+                <div style="font-size:14px;font-weight:600;color:{{ r.stateFg }}">{{ r.stateText }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showPeople }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:6px 20px 8px;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <div style="font-size:13px;font-weight:700;letter-spacing:.12em;color:#A8253A">LOVE CELL</div>
+          <div style="font-family:'Instrument Serif',serif;font-size:40px;line-height:1.05">People</div>
+          <div style="font-size:15px;color:#6E625A">{{ peopleSub }}</div>
+        </div>
+        <input value="{{ pq }}" onChange="{{ onPQ }}" placeholder="Find a name" style="height:44px;border-radius:12px;border:1px solid #DCCFC2;background:#FFFFFF;padding:0 14px;font-family:inherit;font-size:16px;color:#231B17;outline:none">
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:#EAE2D8;border-radius:14px;padding:3px">
+          <sc-for list="{{ ownerFilters }}" as="f" hint-placeholder-count="3">
+            <div onClick="{{ f.onClick }}" style="height:38px;border-radius:11px;background:{{ f.bg }};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;cursor:pointer;color:#231B17">{{ f.label }}</div>
+          </sc-for>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <sc-for list="{{ peopleFilters }}" as="f" hint-placeholder-count="5">
+            <div onClick="{{ f.onClick }}" style="height:34px;padding:0 12px;border-radius:17px;background:{{ f.bg }};color:{{ f.fg }};border:1px solid {{ f.border }};display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;cursor:pointer">{{ f.label }}<span style="font-weight:700">{{ f.count }}</span></div>
+          </sc-for>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{ prows }}" as="p" hint-placeholder-count="8">
+            <div onClick="{{ p.onClick }}" style="display:flex;gap:12px;align-items:center;padding:12px 14px;background:#FFFFFF;border-radius:18px;border:1px solid #EFE6DC;cursor:pointer">
+              <div style="width:40px;height:40px;flex:none;border-radius:20px;background:{{ p.ownerBg }};color:{{ p.ownerFg }};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px">{{ p.initial }}</div>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+                <div style="display:flex;align-items:center;gap:8px;min-width:0">
+                  <span style="font-size:16px;font-weight:600">{{ p.name }}</span>
+                  <sc-if value="{{ p.flag }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;font-weight:700;color:#9C2418;background:#F9DEDA;border-radius:6px;padding:2px 6px;white-space:nowrap">{{ p.flagText }}</span></sc-if>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                  <span style="font-size:12px;font-weight:700;padding:3px 8px;border-radius:999px;background:{{ p.stBg }};color:{{ p.stFg }}">{{ p.label }}</span>
+                  <span style="font-size:13px;color:#6E625A">{{ p.att }}</span>
+                </div>
+              </div>
+              <div style="font-size:12px;color:#6E625A;text-align:right;line-height:1.3;flex:none">Last seen<br><b style="color:#231B17">{{ p.seen }}</b></div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ noPeople }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:30px 10px;text-align:center;color:#6E625A;font-size:15px">Nobody here.</div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+
+  <sc-if value="{{ showMarkBar }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:none;display:flex;align-items:center;gap:12px;padding:12px 20px;background:#FFFDF9;border-top:1px solid #E7DDD2">
+      <div style="flex:1;min-width:0">
+        <div style="font-family:'Instrument Serif',serif;font-size:30px;line-height:1">{{ curCount }} here</div>
+        <div style="font-size:13px;color:#6E625A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ barSub }}</div>
+      </div>
+      <button onClick="{{ openReport }}" style="height:50px;padding:0 22px;border-radius:25px;border:none;background:#A8253A;color:#FFFFFF;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer">Generate report</button>
+    </div>
+  </sc-if>
+
+  <div style="flex:none;display:flex;background:#FFFDF9;border-top:1px solid #E7DDD2;padding:2px 12px 28px">
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+      <div onClick="{{ t.onClick }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;padding:6px 0 4px;cursor:pointer">
+        <div style="width:32px;height:3px;border-radius:2px;background:{{ t.bar }}"></div>
+        <div style="font-size:15px;font-weight:700;color:{{ t.fg }}">{{ t.label }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{ hasPerson }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:30;background:#F6F1EA;display:flex;flex-direction:column">
+      <div style="height:54px;flex:none"></div>
+      <div style="flex:none;padding:2px 12px 0">
+        <button onClick="{{ closePerson }}" style="height:40px;padding:0 10px;border:none;background:transparent;color:#A8253A;font-family:inherit;font-size:17px;font-weight:700;cursor:pointer">‹ Back</button>
+      </div>
+      <div class="lc-scroll" style="flex:1;overflow-y:auto;scrollbar-width:none;padding:4px 20px 40px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="font-family:'Instrument Serif',serif;font-size:42px;line-height:1.05">{{ person.name }}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <span style="font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px;background:{{ person.ownerBg }};color:{{ person.ownerFg }}">{{ person.ownerLabel }}</span>
+            <span style="font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px;background:{{ person.stBg }};color:{{ person.stFg }}">{{ person.label }}</span>
+          </div>
+        </div>
+        <div style="background:#FFFFFF;border:1px solid #EDE4DA;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:baseline;gap:10px">
+            <div style="font-family:'Instrument Serif',serif;font-size:46px;line-height:1">{{ person.attBig }}</div>
+            <div style="font-size:15px;color:#6E625A">{{ person.attSmall }}</div>
+          </div>
+          <sc-if value="{{ person.isNew }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px">
+                <sc-for list="{{ person.segs }}" as="s" hint-placeholder-count="8">
+                  <div style="height:8px;border-radius:4px;background:{{ s.bg }}"></div>
+                </sc-for>
+              </div>
+              <div style="font-size:13px;color:#6E625A">{{ person.weekText }}</div>
+            </div>
+          </sc-if>
+          <div style="display:flex;flex-direction:column;border-top:1px solid #F0E8DF">
+            <div style="display:flex;justify-content:space-between;padding:10px 0;font-size:15px;border-bottom:1px solid #F0E8DF"><span style="color:#6E625A">First visit</span><b>{{ person.first }}</b></div>
+            <div style="display:flex;justify-content:space-between;padding:10px 0;font-size:15px"><span style="color:#6E625A">Last seen</span><b>{{ person.last }}</b></div>
+          </div>
+        </div>
+        <sc-if value="{{ person.flag }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#F9DEDA;color:#7A1C12;border-radius:18px;padding:14px 16px;font-size:15px;font-weight:600">{{ person.flagText }}</div>
+        </sc-if>
+        <div style="background:#FFFFFF;border:1px solid #EDE4DA;border-radius:22px;padding:6px 18px">
+          <sc-for list="{{ person.history }}" as="h" hint-placeholder-count="4">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #F0E8DF;font-size:15px">
+              <span>{{ h.label }}</span>
+              <span style="font-weight:700;color:{{ h.fg }}">{{ h.mark }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ person.canEdit }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:15px;font-weight:700">Fix a mistake</div>
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));background:#EAE2D8;border-radius:14px;padding:3px">
+              <sc-for list="{{ person.ownerOpts }}" as="o" hint-placeholder-count="2">
+                <div onClick="{{ o.onClick }}" style="height:38px;border-radius:11px;background:{{ o.bg }};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;cursor:pointer">{{ o.label }}</div>
+              </sc-for>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));background:#EAE2D8;border-radius:14px;padding:3px">
+              <sc-for list="{{ person.kindOpts }}" as="o" hint-placeholder-count="2">
+                <div onClick="{{ o.onClick }}" style="height:38px;border-radius:11px;background:{{ o.bg }};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;cursor:pointer">{{ o.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ hasReport }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:40;background:rgba(35,27,23,0.5);display:flex;flex-direction:column;justify-content:flex-end">
+      <div onClick="{{ closeReport }}" style="flex:1;min-height:80px"></div>
+      <div style="background:#FFFDF9;border-radius:28px 28px 0 0;padding:10px 20px 34px;display:flex;flex-direction:column;gap:14px">
+        <div style="width:40px;height:5px;border-radius:3px;background:#DCCFC2;align-self:center"></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end">
+          <div>
+            <div style="font-family:'Instrument Serif',serif;font-size:32px;line-height:1">Report</div>
+            <div style="font-size:14px;color:#6E625A">{{ report.title }}</div>
+          </div>
+          <div style="font-size:15px;font-weight:700">{{ report.count }} here</div>
+        </div>
+        <div class="lc-scroll" style="max-height:420px;overflow-y:auto;scrollbar-width:none;background:#F3ECE3;border-radius:16px;padding:16px;font-size:15px;line-height:1.5;white-space:pre-wrap">{{ report.text }}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <button onClick="{{ copyReport }}" style="height:52px;border-radius:26px;border:none;background:#A8253A;color:#FFFFFF;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer">{{ copyLabel }}</button>
+          <a href="{{ report.wa }}" target="_blank" style="height:52px;border-radius:26px;border:1px solid #DCCFC2;background:#FFFFFF;color:#231B17;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;text-decoration:none">Send on WhatsApp</a>
+        </div>
+        <div onClick="{{ closeReport }}" style="text-align:center;font-size:15px;font-weight:600;color:#6E625A;cursor:pointer;padding:4px">Close</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:20px;right:20px;bottom:170px;z-index:50;background:#231B17;color:#F6F1EA;border-radius:16px;padding:14px 16px;font-size:15px;font-weight:500;text-align:center;box-shadow:0 10px 30px rgba(35,27,23,0.25)">{{ toast }}</div>
+  </sc-if>
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:402,&quot;height&quot;:874},&quot;idea&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;A&quot;,&quot;B&quot;,&quot;C&quot;],&quot;default&quot;:&quot;A&quot;,&quot;tsType&quot;:&quot;'A'|'B'|'C'&quot;},&quot;pretendToday&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;2026-10-23&quot;,&quot;2026-11-01&quot;,&quot;2026-12-13&quot;],&quot;default&quot;:&quot;2026-10-23&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const DAY=864e5;
+const toMs=d=>Date.UTC(+d.slice(0,4),+d.slice(5,7)-1,+d.slice(8,10));
+const toStr=ms=>new Date(ms).toISOString().slice(0,10);
+const WD=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const WDL=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MOL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const wd=d=>new Date(toMs(d)).getUTCDay();
+const dn=d=>+d.slice(8,10);
+const mo=d=>+d.slice(5,7)-1;
+const fmt=d=>WD[wd(d)]+' '+dn(d)+' '+MO[mo(d)];
+const fmtLong=d=>WDL[wd(d)]+' '+dn(d)+' '+MOL[mo(d)];
+const fmtShort=d=>dn(d)+' '+MO[mo(d)];
+const fmtSlash=d=>d.slice(8,10)+'/'+d.slice(5,7)+'/'+d.slice(2,4);
+const days=(a,b)=>Math.round((toMs(b)-toMs(a))/DAY);
+const addDays=(d,n)=>toStr(toMs(d)+n*DAY);
+const weekStart=d=>addDays(d,-wd(d));
+const SN={MGS:'MGS',LC:'LC Live'};
+const svcName=s=>SN[s.type]+' · '+fmt(s.date);
+
+const SEED=`L|Fred Adzah|Senior Shepherd|M11 L14 M18 L21
+L|Nelson Ansah|Cell Shepherd|M11 L14 M18 L21
+L|Emmanuella Lithur|Shepherd|M18 L21
+N|Kezia|f|M11 L14 M18
+N|Precious|f|M11 L14 M18
+N|Bibiana|f|M11 L14 M18
+N|Sheridan|f|M11 L14 M18
+N|Josephine|f|M11 L14 L21
+N|Josephine B|f|M11
+N|Josephine Mamle|f|L14 M18
+N|Shelter|f|M11 L14
+N|Benedicta|f|M11 L14 M18 L21
+N|Matilda|f|M11 L14 M18 L21
+N|Derrick|f|M11
+N|Fatima|f|M11
+N|Collins|f|M11 L14 L21
+N|Debbie|f|M11 L14 L21
+N|Hannah|f|M11 L14
+N|Lilian|f|L14
+N|Bridget|f|L14 M18
+N|Annabelle|f|L14 M18
+N|Dela|f|L14
+N|Faustina|f|L14
+N|Kwabena|f|M18
+N|Vickybel|f|M18
+N|George|f|M18
+N|Juliet|f|M18
+N|Eugenia|f|M18
+N|Ewurabena|f|M18
+N|Joy|f|L21
+N|Gloria Viera|o|M11 M18
+N|Tracy NeeQuaye|o|M18 L21
+N|Kate Atsu|o|L21
+N|Karen Tinawura|o|L21
+E|Theresa|f|L14
+E|Linda|f|L14 M18
+E|Audrey|f|L14 M18 L21
+E|Caroline|f|L14 L21
+E|Dzifa|f|L14
+E|Zion|f|L14
+E|Judith Fafali|f|M18
+E|Chris Mondy|f|M18
+E|Josephine|f|M18
+E|Mabel|f|M18
+E|Jane|f|M18
+E|Janet|f|M18
+E|Arnold|f|L21`;
+
+function seed(){
+  const services=[{id:'M11',type:'MGS',date:'2026-10-11'},{id:'L14',type:'LC',date:'2026-10-14'},{id:'M18',type:'MGS',date:'2026-10-18'},{id:'L21',type:'LC',date:'2026-10-21'}];
+  const att={M11:[],L14:[],M18:[],L21:[]};
+  const people=SEED.split('\n').map((line,i)=>{
+    const [g,name,k,codes]=line.split('|');const id='p'+(i+1);
+    codes.split(' ').forEach(c=>att[c].push(id));
+    if(g==='L')return {id,name,owner:null,kind:'leader',role:k};
+    return {id,name,owner:g==='N'?'Nelson':'Ella',kind:k==='o'?'old':'first'};
+  });
+  return {people,services,att};
+}
+
+const ST={new:{bg:'#ECE5DC',fg:'#4A3F38'},regular:{bg:'#DFF0E2',fg:'#1F6234'},onoff:{bg:'#FAEACB',fg:'#7D5108'},followup:{bg:'#F9DEDA',fg:'#9C2418'},old:{bg:'#E9E4F2',fg:'#4B3D78'},leader:{bg:'#231B17',fg:'#F6F1EA'},none:{bg:'#ECE5DC',fg:'#6E625A'}};
+const OWN={Nelson:{label:"Nelson's",bg:'#F5E1E4',fg:'#8E1F33',solid:'#A8253A'},Ella:{label:"Ella's",bg:'#DCEDEA',fg:'#17605A',solid:'#1F6F68'}};
+const LEAD={label:'Leader',bg:'#E8E0D6',fg:'#231B17',solid:'#231B17'};
+const ownerOf=p=>p.owner?OWN[p.owner]:LEAD;
+const dispName=p=>p.id==='p3'?'Emmanuella Lithur (Ella)':p.name;
+
+function compute(S,todayIn){
+  const svcs=[...S.services].sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+  const lastDate=svcs.length?svcs[svcs.length-1].date:todayIn;
+  const today=todayIn>lastDate?todayIn:lastDate;
+  const sets={};svcs.forEach(s=>sets[s.id]=new Set(S.att[s.id]||[]));
+  const last2=svcs.slice(-2);
+  const people=S.people.map(p=>{
+    const visits=svcs.filter(s=>sets[s.id].has(p.id));
+    const fv=visits.length?visits[0].date:null, ls=visits.length?visits[visits.length-1].date:null;
+    const r={...p,visits,firstVisit:fv,firstSvc:visits[0]||null,lastSeen:ls,since:ls?days(ls,today):null};
+    if(p.kind==='leader'){r.key='leader';r.label=p.role;}
+    else if(p.kind==='old'){r.key='old';r.label='Old member';}
+    else if(!fv){r.key='none';r.label='Not seen yet';}
+    else{
+      const end=addDays(fv,56);
+      const win=svcs.filter(s=>s.date>=fv&&s.date<end);
+      r.held=win.length;r.attended=win.filter(s=>sets[s.id].has(p.id)).length;
+      if(today<end){r.week=Math.min(8,Math.floor(days(fv,today)/7)+1);r.key='new';r.label='New · week '+r.week+' of 8';}
+      else{const pct=r.attended/r.held;r.key=pct>=0.75?'regular':pct>=0.4?'onoff':'followup';r.label={regular:'Coming regularly',onoff:'On and off',followup:'Needs a follow-up'}[r.key];}
+    }
+    r.flagged=p.id!=='p2'&&!!ls&&r.since>=21;
+    r.missed2=!r.flagged&&p.id!=='p2'&&!!fv&&last2.length===2&&fv<last2[0].date&&last2.every(s=>!sets[s.id].has(p.id));
+    r.call=r.flagged||r.missed2;
+    r.callReason=r.flagged?'Not seen for '+Math.floor(r.since/7)+' weeks':'Missed the last 2';
+    return r;
+  });
+  return {svcs,today,people,sets};
+}
+
+function nextSlot(svcs,today){
+  let d=svcs.length?addDays(svcs[svcs.length-1].date,1):today;
+  while(wd(d)!==0&&wd(d)!==3)d=addDays(d,1);
+  const type=wd(d)===0?'MGS':'LC';
+  return {id:(type==='MGS'?'M':'L')+d.replace(/-/g,''),type,date:d,isNew:true};
+}
+
+function reportText(S,slot){
+  const set=new Set(S.att[slot.id]||[]);
+  const L=['*OASIS BACENTA ATTENDANCE*',(slot.type==='MGS'?'MGS':'LC LIVE')+' - '+fmtSlash(slot.date)];
+  if(set.has('p1'))L.push('*SS - Fred Adzah');
+  if(set.has('p2'))L.push('*CS - Nelson Ansah');
+  if(set.has('p3'))L.push('*S - Emmanuella Lithur');
+  S.people.filter(p=>p.owner==='Nelson'&&set.has(p.id)).forEach(p=>L.push('- '+p.name));
+  S.people.filter(p=>p.owner==='Ella'&&set.has(p.id)).forEach(p=>L.push('- '+p.name+' (from Ella)'));
+  return {text:L.join('\n'),count:set.size};
+}
+
+class Component extends DCLogic {
+  state={S:null,tab:'home',svcId:null,mf:'all',q:'',pq:'',pf:'all',po:'all',personId:null,reportId:null,newName:'',newN:'',newE:'',toast:null,copied:false};
+  scrollRef=React.createRef();
+  lsKey(){return 'lovecell-v1-'+(this.props.idea||'A');}
+  componentDidMount(){
+    let S=null;try{S=JSON.parse(localStorage.getItem(this.lsKey())||'null')}catch(e){}
+    if(!S||!S.people||!S.services||!S.att)S=seed();
+    this.setState({S});
+  }
+  componentWillUnmount(){clearTimeout(this._t);}
+  commit(S){this.setState({S});try{localStorage.setItem(this.lsKey(),JSON.stringify(S))}catch(e){}}
+  flash(msg){clearTimeout(this._t);this.setState({toast:msg});this._t=setTimeout(()=>this.setState({toast:null}),2600);}
+  go(tab,extra){this.setState({tab,personId:null,...(extra||{})});const el=this.scrollRef.current;if(el)el.scrollTop=0;}
+  withSvc(S,slot){
+    if(!S.services.find(s=>s.id===slot.id))S.services=[...S.services,{id:slot.id,type:slot.type,date:slot.date}];
+    if(!S.att[slot.id])S.att[slot.id]=[];
+  }
+  toggle(slot,pid){
+    const S={...this.state.S,att:{...this.state.S.att}};this.withSvc(S,slot);
+    const l=S.att[slot.id];S.att[slot.id]=l.includes(pid)?l.filter(x=>x!==pid):[...l,pid];
+    this.commit(S);if(this.state.svcId!==slot.id)this.setState({svcId:slot.id});
+  }
+  add(owner,name,slot){
+    name=(name||'').trim();if(!name)return;
+    const id='p'+Date.now();
+    const S={...this.state.S,att:{...this.state.S.att},people:[...this.state.S.people,{id,name,owner,kind:'first'}]};
+    this.withSvc(S,slot);S.att[slot.id]=[...S.att[slot.id],id];
+    this.commit(S);this.setState({newName:'',newN:'',newE:'',svcId:slot.id});
+    this.flash(name+' added to '+owner+"'s people and marked here");
+  }
+  setPerson(pid,patch){this.commit({...this.state.S,people:this.state.S.people.map(p=>p.id===pid?{...p,...patch}:p)});}
+  reset(){this.commit(seed());this.setState({svcId:null,personId:null,reportId:null});this.flash('Back to the 4 real services');}
+  copy(text){
+    const done=()=>{this.setState({copied:true});setTimeout(()=>this.setState({copied:false}),1800);};
+    const fb=()=>{const a=document.createElement('textarea');a.value=text;document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(e){}a.remove();done();};
+    try{navigator.clipboard.writeText(text).then(done,fb)}catch(e){fb()}
+  }
+
+  renderVals(){
+    const st=this.state,S=st.S,idea=this.props.idea||'A';
+    const base={scrollRef:this.scrollRef};
+    if(!S)return {...base,tabs:[]};
+    const {svcs,today,people,sets}=compute(S,this.props.pretendToday||'2026-10-23');
+    const byId={};people.forEach(p=>byId[p.id]=p);
+    const leaders=people.filter(p=>p.kind==='leader');
+    const members=people.filter(p=>p.kind!=='leader');
+    const firsts=people.filter(p=>p.kind==='first'&&p.firstVisit);
+    const olds=people.filter(p=>p.kind==='old');
+    const toCall=people.filter(p=>p.call).sort((a,b)=>(b.since||0)-(a.since||0));
+    const next=nextSlot(svcs,today);
+    const slots=[...svcs,next];
+    const cur=slots.find(s=>s.id===st.svcId)||next;
+    const curSet=new Set(S.att[cur.id]||[]);
+    const open=pid=>()=>this.setState({personId:pid});
+    const thisWeek=weekStart(today);
+    const newWk=firsts.filter(p=>weekStart(p.firstVisit)===thisWeek);
+    const cameBack=firsts.filter(p=>p.visits.length>1).length;
+    const start=svcs.length?svcs[0].date:today;
+    const dNext=days(today,next.date);
+    const nx={name:SN[next.type],long:fmtLong(next.date),short:fmt(next.date),when:dNext<0?'Not taken yet':dNext===0?'Today':dNext===1?'Tomorrow':'In '+dNext+' days',onClick:()=>this.go(idea==='C'?'home':'mark',{svcId:next.id})};
+    const callAll=()=>this.go('people',{pf:'call',po:'all',pq:''});
+    const seenShort=p=>p.lastSeen?fmtShort(p.lastSeen):'—';
+    const attLine=p=>p.kind==='first'&&p.held!=null?p.attended+' of '+p.held+' since first visit':p.visits.length+' of '+svcs.length+' services';
+
+    const curCount=curSet.size;
+    const cnt=(f)=>people.filter(p=>curSet.has(p.id)&&f(p)).length;
+    const barSub=cnt(p=>p.kind==='leader')+' leaders · '+cnt(p=>p.owner==='Nelson')+" Nelson's · "+cnt(p=>p.owner==='Ella')+" Ella's";
+
+    // Home A
+    const callTop=toCall.slice(0,5).map(p=>{const o=ownerOf(p);return {name:dispName(p),initial:p.name[0],ownerBg:o.bg,ownerFg:o.fg,ownerLabel:o.label,reason:p.callReason,seen:p.lastSeen?'Since '+fmtShort(p.lastSeen):'',onClick:open(p.id)};});
+    const maxC=Math.max(1,...svcs.map(s=>sets[s.id].size));
+    const recent=svcs.slice(-4).reverse().map(s=>{const n=firsts.filter(p=>p.firstSvc&&p.firstSvc.id===s.id).length;return {name:svcName(s),count:sets[s.id].size,w:Math.round(sets[s.id].size/maxC*100)+'%',newLine:n?n+' came for the first time':'No first-timers',onOpen:()=>this.go(idea==='C'?'home':'mark',{svcId:s.id}),onReport:()=>this.setState({reportId:s.id})};});
+
+    // Home B
+    const weeks=[];for(let w=weekStart(start);w<=thisWeek;w=addDays(w,7))weeks.push(w);
+    const wk=weeks.map(w=>{const l=firsts.filter(p=>weekStart(p.firstVisit)===w);return {w,n:l.filter(p=>p.owner==='Nelson').length,e:l.filter(p=>p.owner==='Ella').length};});
+    const maxW=Math.max(1,...wk.map(x=>x.n+x.e));
+    const weeksB=wk.slice(-4).map(x=>({label:(x.w===thisWeek?'This week':'Week of '+fmtShort(x.w)),count:x.n+x.e,nW:(x.n/maxW*100)+'%',eW:(x.e/maxW*100)+'%'}));
+    const svcBars=svcs.slice(-5).map(s=>{const set=sets[s.id];const c=f=>people.filter(p=>set.has(p.id)&&f(p)).length;const k=130/maxC;return {count:set.size,hL:c(p=>p.kind==='leader')*k+'px',hN:c(p=>p.owner==='Nelson')*k+'px',hE:c(p=>p.owner==='Ella')*k+'px',top:SN[s.type],date:fmtShort(s.date),onClick:()=>this.go('mark',{svcId:s.id})};});
+    const BK=[['new','New (first 8 weeks)','#B5A595'],['regular','Coming regularly','#2E7D45'],['onoff','On and off','#D9962B'],['followup','Needs a follow-up','#C2412F']];
+    const buckets=BK.map(([k,l,c])=>{const n=firsts.filter(p=>p.key===k).length;return {label:l,count:n,color:c,fg:n?'#231B17':'#8F8279',w:(firsts.length?n/firsts.length*100:0)+'%',onClick:()=>this.go('people',{pf:k,po:'all',pq:''})};});
+    const lastSvc=svcs[svcs.length-1];
+    const split=['Nelson','Ella'].map(o=>{const l=people.filter(p=>p.owner===o);return {label:OWN[o].label+' people',bg:OWN[o].bg,fg:OWN[o].fg,people:l.length,firsts:l.filter(p=>p.kind==='first').length,last:lastSvc?l.filter(p=>sets[lastSvc.id].has(p.id)).length:0,onClick:()=>this.go('people',{pf:'all',po:o,pq:''})};});
+
+    // Home C register
+    const colSlots=[...svcs.slice(-4),next];
+    const cols=colSlots.map(s=>{const sel=s.id===cur.id;return {top:WD[wd(s.date)],num:String(dn(s.date)),bg:sel?'#A8253A':s.isNew?'transparent':'#FFFFFF',fg:sel?'#FFFFFF':'#231B17',border:sel?'none':s.isNew?'1.5px dashed #B5A595':'1px solid #E7DDD2',onClick:()=>this.setState({svcId:s.id})};});
+    const regRow=p=>{const o=ownerOf(p);const s=ST[p.key]||ST.none;return {name:p.id==='p3'?'Ella Lithur':p.name,label:p.label,labelFg:p.key==='leader'?'#6E625A':s.fg,flag:p.call,onOpen:open(p.id),cells:colSlots.map(c=>{const on=(S.att[c.id]||[]).includes(p.id);const sel=c.id===cur.id;return {mark:on?'✓':'',bg:on?o.solid:sel?'#FFFFFF':'transparent',border:on?'none':sel?'1.5px solid #A8253A':'1.5px solid #DCCFC2',onClick:()=>this.setState({svcId:c.id},()=>this.toggle(c,p.id))};})};};
+    const regGroups=[['Leaders',leaders,null],["Nelson's people",people.filter(p=>p.owner==='Nelson'),'Nelson'],["Ella's people",people.filter(p=>p.owner==='Ella'),'Ella']].map(([t,l,o])=>{const val=o==='Nelson'?st.newN:st.newE;return {title:t,color:o?OWN[o].fg:'#231B17',here:l.filter(p=>curSet.has(p.id)).length+' of '+l.length+' at '+fmtShort(cur.date),rows:l.map(regRow),canAdd:!!o,val:val,onInput:e=>this.setState(o==='Nelson'?{newN:e.target.value}:{newE:e.target.value}),onAdd:()=>this.add(o,val,cur),addLabel:'Add · '+dn(cur.date)+' '+MO[mo(cur.date)],btnBg:val&&val.trim()?OWN[o||'Nelson'].solid:'#CDBFB2'};});
+
+    // Mark
+    const chips=[...slots].reverse().map(s=>{const sel=s.id===cur.id;return {top:s.isNew?'Next · '+SN[s.type]:SN[s.type],label:fmt(s.date),bg:sel?'#A8253A':'#FFFFFF',fg:sel?'#FFFFFF':'#231B17',border:sel?'1px solid #A8253A':s.isNew?'1.5px dashed #B5A595':'1px solid #E7DDD2',onClick:()=>this.setState({svcId:s.id})};});
+    const q=st.q.trim().toLowerCase();
+    const match=p=>!q||p.name.toLowerCase().includes(q)||(p.id==='p3'&&'ella'.includes(q));
+    const mrow=p=>{const on=curSet.has(p.id);const o=ownerOf(p);return {name:dispName(p),sub:p.label,check:on?'✓':'',dotBg:on?o.solid:'transparent',dotBorder:on?o.solid:'#CDBFB2',rowBg:on?'#FFFFFF':'transparent',stateText:on?'Here':'Not here',stateFg:on?o.solid:'#6E625A',onToggle:()=>this.toggle(cur,p.id)};};
+    const markGroups=[['Leaders',leaders,'all'],["Nelson's people",people.filter(p=>p.owner==='Nelson'),'Nelson'],["Ella's people",people.filter(p=>p.owner==='Ella'),'Ella']]
+      .filter(g=>st.mf==='all'||st.mf===g[2])
+      .map(([t,l])=>{const rows=l.filter(match);return {title:t,here:rows.filter(p=>curSet.has(p.id)).length+' of '+rows.length+' here',rows:rows.map(mrow),n:rows.length};}).filter(g=>g.n);
+    const markFilters=[['all','Everyone'],['Nelson',"Nelson's"],['Ella',"Ella's"]].map(([k,l])=>({label:l,bg:st.mf===k?'#FFFFFF':'transparent',onClick:()=>this.setState({mf:k})}));
+    const canAdd=!!st.newName.trim();
+
+    // People
+    const FD=[['all','Everyone',members],['call','To call',toCall],['new','New',firsts.filter(p=>p.key==='new')],['regular','Coming regularly',firsts.filter(p=>p.key==='regular')],['onoff','On and off',firsts.filter(p=>p.key==='onoff')],['followup','Needs a follow-up',firsts.filter(p=>p.key==='followup')],['none','Not seen yet',people.filter(p=>p.key==='none')],['old','Old members',olds],['leaders','Leaders',leaders]];
+    const pfd=FD.find(f=>f[0]===st.pf)||FD[0];
+    const pq=st.pq.trim().toLowerCase();
+    const plist=pfd[2].filter(p=>(st.po==='all'||p.owner===st.po)&&(!pq||p.name.toLowerCase().includes(pq)));
+    const prows=plist.map(p=>{const o=ownerOf(p);const s=ST[p.key]||ST.none;return {name:dispName(p),initial:p.name[0],ownerBg:o.bg,ownerFg:o.fg,label:p.label,stBg:s.bg,stFg:s.fg,att:attLine(p),seen:seenShort(p),flag:p.call,flagText:p.flagged?'3+ weeks':'Missed 2',onClick:open(p.id)};});
+    const peopleFilters=FD.filter(f=>f[0]==='all'||f[0]==='call'||f[2].length).map(([k,l,arr])=>{const a=st.pf===k;const red=k==='call';return {label:l,count:arr.length,bg:a?(red?'#9C2418':'#231B17'):'#FFFFFF',fg:a?'#FFFFFF':(red?'#9C2418':'#231B17'),border:a?(red?'#9C2418':'#231B17'):'#E2D7CB',onClick:()=>this.setState({pf:k})};});
+    const ownerFilters=[['all','Both'],['Nelson',"Nelson's"],['Ella',"Ella's"]].map(([k,l])=>({label:l,bg:st.po===k?'#FFFFFF':'transparent',onClick:()=>this.setState({po:k})}));
+
+    // Person
+    let person=null;const pp=st.personId&&byId[st.personId];
+    if(pp){const o=ownerOf(pp);const s=ST[pp.key]||ST.none;const isF=pp.kind==='first'&&pp.held!=null;
+      person={name:dispName(pp),ownerLabel:pp.owner?OWN[pp.owner].label+' people':pp.role,ownerBg:o.bg,ownerFg:o.fg,label:pp.kind==='leader'?'Not a member':pp.label,stBg:s.bg,stFg:s.fg,
+        attBig:isF?pp.attended+' of '+pp.held:pp.visits.length+' of '+svcs.length,attSmall:isF?'services since first visit':'services so far',
+        isNew:pp.key==='new',segs:Array.from({length:8},(_,i)=>({bg:i<(pp.week||0)?'#A8253A':'#F0E8DF'})),weekText:pp.week?'Week '+pp.week+' of their first 8 weeks · ends '+fmt(addDays(pp.firstVisit,55)):'',
+        first:pp.firstSvc?svcName(pp.firstSvc):'Not yet',last:pp.lastSeen?fmt(pp.lastSeen)+(pp.since===0?' · today':' · '+pp.since+(pp.since===1?' day ago':' days ago')):'Not yet',
+        flag:pp.call,flagText:pp.flagged?'Not seen for '+Math.floor(pp.since/7)+' weeks. Give them a call.':'Missed the last 2 services. Give them a call.',
+        history:[...svcs].reverse().map(sv=>{const on=sets[sv.id].has(pp.id);return {label:svcName(sv),mark:on?'Here':'Not here',fg:on?'#1F6234':'#8F8279'};}),
+        canEdit:pp.kind!=='leader',
+        ownerOpts:['Nelson','Ella'].map(k=>({label:OWN[k].label+' people',bg:pp.owner===k?'#FFFFFF':'transparent',onClick:()=>this.setPerson(pp.id,{owner:k})})),
+        kindOpts:[['first','First-timer'],['old','Old member']].map(([k,l])=>({label:l,bg:pp.kind===k?'#FFFFFF':'transparent',onClick:()=>this.setPerson(pp.id,{kind:k})}))};
+    }
+
+    // Report
+    let report=null;const rs=st.reportId&&slots.find(s=>s.id===st.reportId);
+    if(rs){const r=reportText(S,rs);report={title:SN[rs.type]+' · '+fmtLong(rs.date),text:r.text,count:r.count,wa:'https://wa.me/?text='+encodeURIComponent(r.text)};}
+
+    const tabDefs=idea==='C'?[['home','Register'],['people','People']]:[['home','Home'],['mark','Attendance'],['people','People']];
+    const tabs=tabDefs.map(([k,l])=>({label:l,bar:st.tab===k?'#A8253A':'transparent',fg:st.tab===k?'#A8253A':'#6E625A',onClick:()=>this.go(k,k==='people'?{pf:'all',po:'all'}:{})}));
+    const home=st.tab==='home';
+
+    return {...base,tabs,
+      showHomeA:home&&idea==='A',showHomeB:home&&idea==='B',showHomeC:home&&idea==='C',showMark:st.tab==='mark'&&idea!=='C',showPeople:st.tab==='people',
+      showMarkBar:(st.tab==='mark'&&idea!=='C')||(home&&idea==='C'),
+      todayLong:fmtLong(today),next:nx,
+      callCount:toCall.length,callTop,callMore:toCall.length>5,noCall:toCall.length===0,callAll,
+      ftTotal:firsts.length,ftN:firsts.filter(p=>p.owner==='Nelson').length,ftE:firsts.filter(p=>p.owner==='Ella').length,
+      startShort:fmtShort(start),startLong:fmtLong(start),
+      newWeek:newWk.length,newWeekSplit:newWk.filter(p=>p.owner==='Nelson').length+' N · '+newWk.filter(p=>p.owner==='Ella').length+' E',
+      cameBack,cameBackW:(firsts.length?cameBack/firsts.length*100:0)+'%',
+      showNew:()=>this.go('people',{pf:'new',po:'all',pq:''}),
+      recent,weeksB,svcBars,buckets,split,cols,regGroups,
+      reset:()=>this.reset(),
+      cur:{name:SN[cur.type],long:fmtLong(cur.date)+(cur.isNew?' · not taken yet':'')},chips,
+      newName:st.newName,onNewName:e=>this.setState({newName:e.target.value}),
+      addNelson:()=>this.add('Nelson',st.newName,cur),addElla:()=>this.add('Ella',st.newName,cur),
+      addNBg:canAdd?'#A8253A':'#E5DCD1',addEBg:canAdd?'#1F6F68':'#E5DCD1',addFg:canAdd?'#FFFFFF':'#6E625A',
+      markFilters,q:st.q,onQ:e=>this.setState({q:e.target.value}),markGroups,
+      curCount,barSub:idea==='C'?SN[cur.type]+' · '+fmt(cur.date)+' · '+barSub:barSub,openReport:()=>this.setState({reportId:cur.id}),
+      peopleSub:members.length+' people · '+firsts.length+' first-timers · '+olds.length+' old members',
+      pq:st.pq,onPQ:e=>this.setState({pq:e.target.value}),ownerFilters,peopleFilters,prows,noPeople:prows.length===0,
+      hasPerson:!!person,person:person||{},closePerson:()=>this.setState({personId:null}),
+      hasReport:!!report,report:report||{},closeReport:()=>this.setState({reportId:null,copied:false}),
+      copyReport:()=>report&&this.copy(report.text),copyLabel:st.copied?'Copied ✓':'Copy',
+      hasToast:!!st.toast,toast:st.toast};
+  }
+}
+</script>
+</body>
+</html>
