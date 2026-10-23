@@ -70,3 +70,32 @@ export const Progress = ({ pct, h = 6, track }: { pct: number; h?: number; track
     <div className="bar-fill" style={{ width: pct + '%' }} />
   </div>
 );
+
+/** Small round "?" that opens an explanation. Stops the tap reaching the card behind it. */
+export const Ask = ({ onClick, label }: { onClick: () => void; label: string }) => (
+  <div role="button" aria-label={'What is ' + label + '?'} onClick={e => { e.stopPropagation(); onClick(); }} className="ask">?</div>
+);
+
+export interface Explain {
+  title: string;
+  value?: string;
+  body: string[];
+  action?: { label: string; onClick: () => void };
+}
+
+export function ExplainSheet({ e, onClose }: { e: Explain; onClose: () => void }) {
+  return (
+    <Sheet onClose={onClose} z={46} topMin={120} gap={14}>
+      <div>
+        <div className="label" style={{ letterSpacing: '.08em' }}>WHAT THIS MEANS</div>
+        <div className="sheet-title" style={{ marginTop: 2 }}>{e.title}</div>
+      </div>
+      {e.value && <div style={{ fontSize: 40, fontWeight: 600, letterSpacing: '-0.04em', lineHeight: 1 }}>{e.value}</div>}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 15, lineHeight: 1.5, color: '#3A3934' }}>
+        {e.body.map((t, i) => <p key={i} style={{ margin: 0 }}>{t}</p>)}
+      </div>
+      {e.action && <button onClick={() => { onClose(); e.action!.onClick(); }} className="btn">{e.action.label}</button>}
+      <div onClick={onClose} className="link-btn">Close</div>
+    </Sheet>
+  );
+}

@@ -119,3 +119,6 @@ button { font-family: inherit; }
 
 @keyframes fade { from { opacity: 0; } }
 @keyframes up { from { transform: translateY(40px); opacity: .6; } }
+
+.ask { flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 12px; border: 1.5px solid #CFCCC4; color: var(--muted); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; cursor: pointer; user-select: none; }
+.ask:active { background: var(--track); }

@@ -94,6 +94,32 @@ export default function Home() {
           style={{ height: 44, padding: '0 16px', borderRadius: 12, border: 'none', background: C.accent, color: C.ink, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>Attendance</button>
       </div>
 
+      {last && (
+        <div className="card pad" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <div className="card-title">Last service</div>
+              <div className="sub">{last.name} · {last.date}</div>
+            </div>
+            <div onClick={() => set({ reportId: lastSvc.id })} className="pill-btn dark">Report</div>
+          </div>
+          <div onClick={() => go('mark', { svcId: lastSvc.id })} className="tap" style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+            <div style={{ fontSize: 40, fontWeight: 600, lineHeight: 1, letterSpacing: '-0.04em' }}>{last.count}</div>
+            <div className="mono" style={{ fontSize: 12, fontWeight: 600, color: last.deltaFg }}>{last.delta}</div>
+          </div>
+          <div style={{ display: 'flex', gap: 3, height: 10 }}>
+            {[[last.l, C.ink], [last.n, C.accent], [last.e, C.ella]].map(([n, bg], i) => (
+              <div key={i} style={{ height: 10, borderRadius: 3, background: bg as string, width: ((n as number) / last.tot) * 100 + '%' }} />
+            ))}
+          </div>
+          <div className="legend">
+            <span><span className="sq" style={{ background: C.ink }} />Leaders {last.l}</span>
+            <span><span className="sq" style={{ background: C.accent }} />Nelson's {last.n}</span>
+            <span><span className="sq" style={{ background: C.ella }} />Ella's {last.e}</span>
+          </div>
+        </div>
+      )}
+
       <div className="card" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,minmax(0,1fr))' }}>
         <div onClick={showNew} className="tap" style={{ padding: 14, borderRight: `1px solid ${C.line}` }}>
           <div className="small">First-timers</div>
@@ -170,32 +196,6 @@ export default function Home() {
         ))}
       </div>
 
-      {last && (
-        <div className="card pad" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <div className="card-title">Last service</div>
-              <div className="sub">{last.name} · {last.date}</div>
-            </div>
-            <div onClick={() => set({ reportId: lastSvc.id })} className="pill-btn dark">Report</div>
-          </div>
-          <div onClick={() => go('mark', { svcId: lastSvc.id })} className="tap" style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-            <div style={{ fontSize: 40, fontWeight: 600, lineHeight: 1, letterSpacing: '-0.04em' }}>{last.count}</div>
-            <div className="mono" style={{ fontSize: 12, fontWeight: 600, color: last.deltaFg }}>{last.delta}</div>
-          </div>
-          <div style={{ display: 'flex', gap: 3, height: 10 }}>
-            {[[last.l, C.ink], [last.n, C.accent], [last.e, C.ella]].map(([n, bg], i) => (
-              <div key={i} style={{ height: 10, borderRadius: 3, background: bg as string, width: ((n as number) / last.tot) * 100 + '%' }} />
-            ))}
-          </div>
-          <div className="legend">
-            <span><span className="sq" style={{ background: C.ink }} />Leaders {last.l}</span>
-            <span><span className="sq" style={{ background: C.accent }} />Nelson's {last.n}</span>
-            <span><span className="sq" style={{ background: C.ella }} />Ella's {last.e}</span>
-          </div>
-        </div>
-      )}
-
       <div className="card" style={{ padding: '6px 16px 4px', display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '10px 0 2px' }}>
           <div className="card-title">New people</div>
@@ -236,6 +236,7 @@ export default function Home() {
           );
         })}
       </div>
+      <div onClick={() => set({ feedback: true })} className="dashed-btn"><span>✎</span>Something to fix or add? Send feedback</div>
       <div onClick={reset} className="tap" style={{ fontSize: 12, textAlign: 'center', padding: 8, textDecoration: 'underline', color: sure ? C.down : C.muted }}>
         {sure ? 'Tap again to clear everything you added' : 'Start again from the 4 real services'}
       </div>

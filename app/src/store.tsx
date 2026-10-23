@@ -37,11 +37,12 @@ export interface UI {
   meetingId: string | null;
   /** null = closed; otherwise the service chosen up front (undefined = default). */
   add: { svcId?: string } | null;
+  feedback: boolean;
 }
 
 const initialUI: UI = {
   tab: 'home', svcId: null, mf: 'all', q: '', pf: 'all', po: 'all', pq: '', pv: 'people', careTask: 'pray',
-  co: 'all', ftMode: 'week', personId: null, reportId: null, sheet: null, assignFor: null, meetingId: null, add: null,
+  co: 'all', ftMode: 'week', personId: null, reportId: null, sheet: null, assignFor: null, meetingId: null, add: null, feedback: false,
 };
 
 interface Store {

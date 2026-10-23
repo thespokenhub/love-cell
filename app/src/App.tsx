@@ -5,6 +5,7 @@ import People from './screens/People';
 import PersonPage from './screens/PersonPage';
 import Stats from './screens/Stats';
 import { AddSheet, AssignSheet, MeetingSheet, PickSheet, ReportSheet } from './sheets/Sheets';
+import FeedbackSheet from './sheets/Feedback';
 import { useStore, type Tab } from './store';
 
 const TABS: [Tab, string][] = [['home', 'Home'], ['mark', 'Attendance'], ['care', 'Care'], ['people', 'People'], ['stats', 'Stats']];
@@ -36,6 +37,7 @@ export default function App() {
       {ui.sheet === 'meeting' && ui.meetingId && <MeetingSheet meetingId={ui.meetingId} />}
       {ui.add && <AddSheet />}
       {ui.reportId && <ReportSheet svcId={ui.reportId} />}
+      {ui.feedback && <FeedbackSheet />}
       {toast && <div className="toast">{toast}</div>}
     </div>
   );
