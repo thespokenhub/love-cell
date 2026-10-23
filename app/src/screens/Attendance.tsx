@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { fmt, fmtLong } from '../core/dates';
 import { dispName, SVC_NAME } from '../core/rules';
 import { toggleAttendance } from '../core/actions';
@@ -19,14 +20,42 @@ export default function Attendance() {
     if (ui.svcId !== cur.id) set({ svcId: cur.id });
   };
 
+  // The list is sorted into Here / Not here when you open a service. People you tap stay where
+  // they are until you open the list again (or tap "Sort again"), so rows don't jump while marking.
+  const [order, setOrder] = useState(() => ({ id: cur.id, here: new Set(curSet) }));
+  if (order.id !== cur.id) setOrder({ id: cur.id, here: new Set(curSet) });
+  const moved = [...curSet].some(id => !order.here.has(id)) || [...order.here].some(id => !curSet.has(id));
+
   const groups = ([
     ['Leaders', c.people.filter(p => p.kind === 'leader'), 'all'],
     ["Nelson's people", c.people.filter(p => p.owner === 'Nelson' && !p.left), 'Nelson'],
     ["Ella's people", c.people.filter(p => p.owner === 'Ella' && !p.left), 'Ella'],
   ] as const)
     .filter(g => ui.mf === 'all' || ui.mf === g[2])
-    .map(([title, l]) => ({ title, rows: l.filter(match) }))
-    .filter(g => g.rows.length);
+    .map(([title, l]) => ({ title, rows: l.filter(match) }));
+  const shown = groups.flatMap(g => g.rows);
+  const sections = [
+    { key: 'here', title: 'Here', here: true },
+    { key: 'away', title: 'Not here', here: false },
+  ].map(sec => ({
+    ...sec,
+    groups: groups.map(g => ({ ...g, rows: g.rows.filter(p => order.here.has(p.id) === sec.here) })).filter(g => g.rows.length),
+  }));
+  const hereNow = shown.filter(p => curSet.has(p.id)).length;
+
+  const row = (p: PersonView) => {
+    const on = curSet.has(p.id);
+    return (
+      <div key={p.id} onClick={() => toggle(p.id)} className="row tap" style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 52 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 15, fontWeight: 500, color: on ? C.ink : '#3A3934' }}>{dispName(p)}</div>
+          <div className="small">{p.label}</div>
+        </div>
+        <div className="mono" style={{ fontSize: 11, color: on ? C.ink : C.muted }}>{on ? 'Here' : 'Not here'}</div>
+        <Switch on={on} color={ownerOf(p).solid} />
+      </div>
+    );
+  };
 
   return (
     <div style={{ padding: '8px 0', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -51,27 +80,38 @@ export default function Attendance() {
       <div onClick={() => set({ add: { svcId: cur.id } })} className="dashed-btn" style={{ margin: '0 16px' }}>
         <span>+</span>Someone new? Add and mark them here
       </div>
-      {groups.map(g => (
-        <div key={g.title} className="card list" style={{ margin: '0 16px', padding: '0 14px', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '12px 0 8px' }}>
-            <div style={{ fontSize: 14, fontWeight: 600 }}>{g.title}</div>
-            <div className="mono" style={{ fontSize: 11, color: C.muted }}>{g.rows.filter(p => curSet.has(p.id)).length} of {g.rows.length} here</div>
-          </div>
-          {g.rows.map(p => {
-            const on = curSet.has(p.id);
-            return (
-              <div key={p.id} onClick={() => toggle(p.id)} className="row tap" style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 52 }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 15, fontWeight: 500 }}>{dispName(p)}</div>
-                  <div className="small">{p.label}</div>
-                </div>
-                <div className="mono" style={{ fontSize: 11, color: on ? C.ink : C.muted }}>{on ? 'Here' : 'Not here'}</div>
-                <Switch on={on} color={ownerOf(p).solid} />
-              </div>
-            );
-          })}
+      {moved && (
+        <div onClick={() => setOrder({ id: cur.id, here: new Set(curSet) })} className="tap"
+          style={{ margin: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '10px 14px', borderRadius: 12, background: C.track, fontSize: 13 }}>
+          <span style={{ color: '#3A3934' }}>People you just marked stay in place.</span>
+          <span style={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Sort again ↑</span>
         </div>
-      ))}
+      )}
+      {sections.map(sec => {
+        const n = sec.here ? hereNow : shown.length - hereNow;
+        return (
+          <div key={sec.key} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ margin: '4px 18px 0', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ width: 10, height: 10, borderRadius: 5, flex: 'none', boxSizing: 'border-box', background: sec.here ? C.up : 'transparent', border: sec.here ? 'none' : `2px solid ${C.dashed}` }} />
+              <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-0.02em', flex: 1 }}>{sec.title}</div>
+              <div className="mono" style={{ fontSize: 13, fontWeight: 600, color: sec.here ? C.up : C.muted }}>{n}</div>
+            </div>
+            {sec.groups.length === 0 ? (
+              <div className="card list" style={{ margin: '0 16px', padding: '16px 14px', fontSize: 14, color: C.muted }}>
+                {sec.here ? 'Nobody marked yet. Tap a name below when they come in.' : 'Everyone on this list is here.'}
+              </div>
+            ) : sec.groups.map(g => (
+              <div key={g.title} className="card list" style={{ margin: '0 16px', padding: '0 14px', display: 'flex', flexDirection: 'column', background: sec.here ? '#FFFFFF' : '#FBFBF9' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '12px 0 8px' }}>
+                  <div style={{ fontSize: 14, fontWeight: 600 }}>{g.title}</div>
+                  <div className="mono" style={{ fontSize: 11, color: C.muted }}>{g.rows.length}</div>
+                </div>
+                {g.rows.map(row)}
+              </div>
+            ))}
+          </div>
+        );
+      })}
     </div>
   );
 }
