@@ -20,7 +20,8 @@ export function issueUrl(text: string, part: string, today: string) {
     `**Part of the app:** ${part}`,
     `**Sent:** ${fmt(today)} from app version \`${__APP_VERSION__}\``,
   ].join('\n');
-  return `${REPO}/issues/new?${new URLSearchParams({ title, body, labels: 'feedback' })}`;
+  const q = (k: string, v: string) => `${k}=${encodeURIComponent(v)}`;
+  return `${REPO}/issues/new?${q('title', title)}&${q('body', body)}&${q('labels', 'feedback')}`;
 }
 
 export default function FeedbackSheet() {
