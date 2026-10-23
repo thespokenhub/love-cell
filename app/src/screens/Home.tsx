@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { addDays, dayNum, days, fmt, fmtShort, weekStart, weekdayShort } from '../core/dates';
 import { SVC_NAME } from '../core/rules';
 import type { Owner } from '../core/types';
@@ -54,8 +55,16 @@ export default function Home() {
   const newP = firsts.filter(p => p.key === 'new')
     .sort((a, b) => (a.firstVisit! < b.firstVisit! ? -1 : a.firstVisit! > b.firstVisit! ? 1 : b.attended! - a.attended!));
 
+  // Wiping everything takes two taps: the first one asks.
+  const [sure, setSure] = useState(false);
+  useEffect(() => {
+    if (!sure) return;
+    const t = setTimeout(() => setSure(false), 4000);
+    return () => clearTimeout(t);
+  }, [sure]);
   const reset = () => {
-    if (!confirm('Start again from the 4 real services? This clears everything you have changed.')) return;
+    if (!sure) { setSure(true); return; }
+    setSure(false);
     commit(seed());
     set({ svcId: null, personId: null, reportId: null });
     flash('Back to the 4 real services');
@@ -227,7 +236,9 @@ export default function Home() {
           );
         })}
       </div>
-      <div onClick={reset} className="tap" style={{ fontSize: 12, color: C.muted, textAlign: 'center', padding: 8, textDecoration: 'underline' }}>Start again from the 4 real services</div>
+      <div onClick={reset} className="tap" style={{ fontSize: 12, textAlign: 'center', padding: 8, textDecoration: 'underline', color: sure ? C.down : C.muted }}>
+        {sure ? 'Tap again to clear everything you added' : 'Start again from the 4 real services'}
+      </div>
     </div>
   );
 }
