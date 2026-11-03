@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { weekStart } from './dates';
 import { addPerson, tick, toggleAttendance } from './actions';
-import { compute, nextSlot, reportText } from './rules';
+import { compute, followUp, nextSlot, reportText } from './rules';
 import { seed } from './seed';
 
 const TODAY = '2026-10-23';
@@ -97,6 +97,27 @@ describe('absent list', () => {
   it('leaves the report as it was unless asked', () => {
     const S = seed();
     expect(reportText(S, S.services[3]).text).not.toContain('ABSENT');
+  });
+});
+
+describe('follow up', () => {
+  const names = (g: ReturnType<typeof followUp>[number]) => g.people.map(x => x.p.name);
+
+  it('lists who came to the service before last but missed the last one', () => {
+    const [missed, once, gone] = followUp(compute(seed(), TODAY));
+    expect(names(missed)).toContain('Kezia'); // M18 yes, L21 no
+    expect(names(missed)).not.toContain('Benedicta'); // came to both
+    expect(names(missed)).not.toContain('Fred Adzah');
+    expect(names(once)).toEqual(expect.arrayContaining(['Derrick', 'Lilian', 'Theresa']));
+    expect(names(once)).not.toContain('Kwabena'); // first came 5 days ago
+    expect(gone.people).toHaveLength(0);
+  });
+
+  it('moves people to "not seen" after 3 weeks, and lists each person once', () => {
+    const groups = followUp(compute(seed(), '2026-11-08'));
+    const all = groups.flatMap(names);
+    expect(new Set(all).size).toBe(all.length);
+    expect(names(groups[2])).toContain('Derrick');
   });
 });
 

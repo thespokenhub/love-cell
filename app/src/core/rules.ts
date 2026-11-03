@@ -1,4 +1,4 @@
-import { addDays, days, fmtSlash, wd, weekStart } from './dates';
+import { addDays, days, fmt, fmtSlash, wd, weekStart } from './dates';
 import { ELLA, FRED, NELSON } from './seed';
 import type { Data, Person, PersonView, Service, Slot, SvcType, Task } from './types';
 
@@ -125,3 +125,50 @@ export const TASKS: { k: Task; label: string; short: string; hint: string }[] = 
 
 /** The people at Shepherds' meetings: Ella plus all helpers. */
 export const meetingPeople = (people: PersonView[]) => people.filter(p => p.id === ELLA || p.helper);
+
+export interface FollowGroup {
+  key: 'missed' | 'once' | 'gone';
+  title: string;
+  /** The rule, in plain words. */
+  rule: string;
+  people: { p: PersonView; reason: string }[];
+}
+
+/**
+ * Who to reach out to this week, most urgent first. Each person is listed once.
+ * - missed: came to the service before last, but not the last one
+ * - once: came once, at least a week ago, and hasn't been back
+ * - gone: not seen for 3+ weeks
+ * Leaders and people who stopped coming are left out.
+ */
+export function followUp(c: Computed): FollowGroup[] {
+  const { svcs, sets, today } = c;
+  const members = c.people.filter(p => p.kind !== 'leader' && !p.left);
+  const used = new Set<string>();
+  const take = (l: { p: PersonView; reason: string }[]) => l.filter(x => !used.has(x.p.id) && used.add(x.p.id));
+  const svcLabel = (s: Service) => `${SVC_NAME[s.type]} ${fmt(s.date)}`;
+  const groups: FollowGroup[] = [];
+
+  const [a, b] = svcs.slice(-2);
+  if (a && b) {
+    groups.push({
+      key: 'missed', title: 'Missed the last service',
+      rule: `Came to ${svcLabel(a)} but not ${svcLabel(b)}.`,
+      people: take(members.filter(p => sets[a.id].has(p.id) && !sets[b.id].has(p.id))
+        .map(p => ({ p, reason: `Came ${svcLabel(a)}` }))),
+    });
+  }
+  groups.push({
+    key: 'once', title: 'Came once, not back yet',
+    rule: 'First-timers who came once, a week or more ago.',
+    people: take(members.filter(p => p.kind === 'first' && p.visits.length === 1 && days(p.firstVisit!, today) >= 7 && !p.flagged)
+      .map(p => ({ p, reason: `Came once, ${svcLabel(p.firstSvc!)}` }))),
+  });
+  groups.push({
+    key: 'gone', title: 'Not seen for 3+ weeks',
+    rule: 'Not marked at any service for 21 days or more.',
+    people: take(members.filter(p => p.flagged).sort((x, y) => (y.since || 0) - (x.since || 0))
+      .map(p => ({ p, reason: `Last seen ${fmt(p.lastSeen!)} · ${Math.floor(p.since! / 7)} weeks ago` }))),
+  });
+  return groups;
+}

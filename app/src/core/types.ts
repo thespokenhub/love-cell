@@ -25,13 +25,15 @@ export interface Meeting {
   present: string[];
 }
 
-export type WeeklyTask = 'pray' | 'audio' | 'prayWith';
+export type WeeklyTask = 'pray' | 'audio' | 'prayWith' | 'reach';
 export type Task = WeeklyTask | 'plan';
 
 export interface Care {
   pray?: Record<string, string[]>;
   audio?: Record<string, string[]>;
   prayWith?: Record<string, string[]>;
+  /** Follow up: who you called or messaged, by week. */
+  reach?: Record<string, string[]>;
   plan?: string[];
 }
 

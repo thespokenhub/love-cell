@@ -3,17 +3,17 @@ import Care from './screens/Care';
 import Home from './screens/Home';
 import People from './screens/People';
 import PersonPage from './screens/PersonPage';
-import Stats from './screens/Stats';
+import FollowUp from './screens/FollowUp';
 import { AddSheet, AssignSheet, MeetingSheet, PickSheet, ReportSheet } from './sheets/Sheets';
 import FeedbackSheet from './sheets/Feedback';
 import { useStore, type Tab } from './store';
 
-const TABS: [Tab, string][] = [['home', 'Home'], ['mark', 'Attendance'], ['care', 'Care'], ['people', 'People'], ['stats', 'Stats']];
+const TABS: [Tab, string][] = [['home', 'Home'], ['mark', 'Attendance'], ['follow', 'Follow up'], ['care', 'Care'], ['people', 'People']];
 
 export default function App() {
   const { c, ui, go, toast, scrollRef } = useStore();
   const person = ui.personId ? c.byId[ui.personId] : null;
-  const Screen = { home: Home, mark: Attendance, care: Care, people: People, stats: Stats }[ui.tab];
+  const Screen = { home: Home, mark: Attendance, follow: FollowUp, care: Care, people: People }[ui.tab];
 
   return (
     <div className="phone">

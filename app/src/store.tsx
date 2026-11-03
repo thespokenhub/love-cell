@@ -14,7 +14,7 @@ function load(): Data {
   return seed();
 }
 
-export type Tab = 'home' | 'mark' | 'care' | 'people' | 'stats';
+export type Tab = 'home' | 'mark' | 'follow' | 'care' | 'people';
 export type PeopleFilter = 'all' | 'missing' | 'back' | 'once' | 'new' | 'regular' | 'onoff' | 'followup' | 'none' | 'old' | 'leaders' | 'left';
 export type OwnerFilter = 'all' | Owner;
 

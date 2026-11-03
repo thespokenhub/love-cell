@@ -8,6 +8,8 @@ import { C, OWN, ownerOf } from '../theme';
 import { Av, Progress } from '../ui';
 import { seed } from '../core/seed';
 import { careWeek } from './Care';
+import { useFollowCount } from './FollowUp';
+import { AfterEightCard, CameBackCard, NumberTiles } from './Numbers';
 
 export default function Home() {
   const { data, c, today, next, ui, set, go, commit, flash } = useStore();
@@ -16,12 +18,11 @@ export default function Home() {
   const week = weekStart(today);
   const newWeek = firsts.filter(p => weekStart(p.firstVisit!) === week).length;
   const cameBack = cameBackOf(firsts);
-  const flagged = people.filter(p => p.flagged).length;
+  const follow = useFollowCount();
   const dNext = days(today, next.date);
   const when = dNext === 0 ? 'Today' : dNext === 1 ? 'Tomorrow' : `In ${dNext} days`;
   const tasks = careSummary(data, c);
   const showNew = () => go('people', { pf: 'new', po: 'all', pq: '', pv: 'people' });
-  const showMissing = () => go('people', { pf: 'missing', po: 'all', pq: '', pv: 'people' });
 
   // First-timers chart: by the week of their first visit, or by the service of their first visit.
   const split = (l: typeof firsts) => ({ n: l.filter(p => p.owner === 'Nelson').length, e: l.filter(p => p.owner === 'Ella').length });
@@ -131,14 +132,15 @@ export default function Home() {
           <div className="big">{cameBack}</div>
           <div className="mono" style={{ fontSize: 11, color: C.muted }}>{pctOf(cameBack, firsts.length)}% of them</div>
         </div>
-        <div onClick={showMissing} className="tap" style={{ padding: 14 }}>
-          <div className="small">Not seen 3+ wks</div>
-          <div className="big">{flagged}</div>
-          <div className="mono" style={{ fontSize: 11, color: C.muted }}>see who →</div>
+        <div onClick={() => go('follow')} className="tap" style={{ padding: 14 }}>
+          <div className="small">To follow up</div>
+          <div className="big" style={{ color: follow.total - follow.done ? C.down : C.ink }}>{follow.total - follow.done}</div>
+          <div className="mono" style={{ fontSize: 11, color: C.muted }}>{follow.done ? `${follow.done} reached · ` : ''}see who →</div>
         </div>
       </div>
 
       <ServiceChart />
+      <CameBackCard />
 
       <div className="card pad" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
@@ -223,6 +225,10 @@ export default function Home() {
           );
         })}
       </div>
+
+      <div className="eyebrow" style={{ padding: '8px 2px 0' }}>MORE NUMBERS</div>
+      <NumberTiles />
+      <AfterEightCard />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: 10 }}>
         {(['Nelson', 'Ella'] as Owner[]).map(o => {

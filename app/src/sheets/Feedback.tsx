@@ -5,7 +5,7 @@ import { C } from '../theme';
 import { Sheet } from '../ui';
 
 const REPO = 'https://github.com/thespokenhub/love-cell';
-const PARTS: [Tab | 'other', string][] = [['home', 'Home'], ['mark', 'Attendance'], ['care', 'Care'], ['people', 'People'], ['stats', 'Stats'], ['other', 'Something else']];
+const PARTS: [Tab | 'other', string][] = [['home', 'Home'], ['mark', 'Attendance'], ['follow', 'Follow up'], ['care', 'Care'], ['people', 'People'], ['other', 'Something else']];
 
 /** Feedback becomes a GitHub issue that mentions @claude, which starts Claude Code on it. */
 export function issueUrl(text: string, part: string, today: string) {
