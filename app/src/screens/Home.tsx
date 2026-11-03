@@ -138,6 +138,8 @@ export default function Home() {
         </div>
       </div>
 
+      <ServiceChart />
+
       <div className="card pad" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
           <div>
@@ -240,6 +242,83 @@ export default function Home() {
       <div onClick={reset} className="tap" style={{ fontSize: 12, textAlign: 'center', padding: 8, textDecoration: 'underline', color: sure ? C.down : C.muted }}>
         {sure ? 'Tap again to clear everything you added' : 'Start again from the 4 real services'}
       </div>
+    </div>
+  );
+}
+
+const FIRST_TIME = '#FFC2A8';
+
+/** How many came to each service, split into who came back and who was new, or by whose people. */
+function ServiceChart() {
+  const { c, ui, set, go } = useStore();
+  const { svcs, sets, people } = c;
+  const recent = svcs.slice(-6);
+  const mx = Math.max(1, ...recent.map(s => sets[s.id].size));
+  const byOwner = ui.svcMode === 'owner';
+  const bars = recent.map(s => {
+    const here = people.filter(p => sets[s.id].has(p.id));
+    const leaders = here.filter(p => p.kind === 'leader').length;
+    const segs = byOwner
+      ? [[here.filter(p => p.owner === 'Ella').length, C.ella], [here.filter(p => p.owner === 'Nelson').length, C.accent]]
+      : (() => {
+          const first = here.filter(p => p.kind !== 'leader' && p.firstSvc?.id === s.id).length;
+          return [[first, FIRST_TIME], [here.length - leaders - first, C.accent]];
+        })();
+    return { s, total: here.length, segs: [...segs, [leaders, C.ink]] as [number, string][] };
+  });
+  const last = bars[bars.length - 1];
+  const returning = last && !byOwner ? last.segs[1][0] : 0;
+
+  return (
+    <div className="card pad" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
+        <div style={{ minWidth: 0 }}>
+          <div className="card-title">People at each service</div>
+          <div className="sub">{byOwner ? 'Whose people came' : 'Who came back, and who was new'}</div>
+        </div>
+        <div style={{ flex: 'none', display: 'flex', background: C.track, borderRadius: 10, padding: 3 }}>
+          {([['back', 'Came back'], ['owner', 'Whose']] as const).map(([k, l]) => {
+            const on = ui.svcMode === k;
+            return (
+              <div key={k} onClick={() => set({ svcMode: k })} className="tap"
+                style={{ height: 28, padding: '0 9px', borderRadius: 7, background: on ? '#FFF' : 'transparent', color: on ? C.ink : C.muted, boxShadow: on ? '0 1px 2px rgba(0,0,0,0.12)' : 'none', display: 'flex', alignItems: 'center', fontSize: 12, fontWeight: 500, whiteSpace: 'nowrap' }}>{l}</div>
+            );
+          })}
+        </div>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 8, height: 150, borderBottom: `1px solid ${C.divider}` }}>
+        {bars.map(b => (
+          <div key={b.s.id} onClick={() => go('mark', { svcId: b.s.id })} className="tap" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+            <div style={{ fontSize: 14, fontWeight: 600 }}>{b.total}</div>
+            <div style={{ width: '100%', maxWidth: 44, display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {b.segs.map(([n, bg], i) => n > 0 && <div key={i} style={{ height: Math.max(3, Math.round((n / mx) * 110) - 2), borderRadius: 6, background: bg }} />)}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginTop: -6 }}>
+        {bars.map(b => (
+          <div key={b.s.id} style={{ flex: 1, textAlign: 'center', lineHeight: 1.3 }}>
+            <div style={{ fontSize: 11, color: C.muted }}>{SVC_NAME[b.s.type]}</div>
+            <div className="mono" style={{ fontSize: 11, fontWeight: 600 }}>{fmtShort(b.s.date)}</div>
+          </div>
+        ))}
+      </div>
+      <div className="legend">
+        {byOwner ? <>
+          <span><span className="sq" style={{ background: C.accent }} />Nelson's</span>
+          <span><span className="sq" style={{ background: C.ella }} />Ella's</span>
+        </> : <>
+          <span><span className="sq" style={{ background: C.accent }} />Came before</span>
+          <span><span className="sq" style={{ background: FIRST_TIME }} />First time</span>
+        </>}
+        <span><span className="sq" style={{ background: C.ink }} />Leaders</span>
+      </div>
+      {last && !byOwner && (
+        <div className="small" style={{ lineHeight: 1.45, borderTop: `1px solid ${C.divider}`, paddingTop: 10 }}>
+          At {SVC_NAME[last.s.type]} on {fmtShort(last.s.date)}: <b style={{ color: C.ink }}>{returning}</b> had come before and <b style={{ color: C.ink }}>{last.segs[0][0]}</b> came for the first time. Tap a bar to see who.
+        </div>
+      )}
     </div>
   );
 }

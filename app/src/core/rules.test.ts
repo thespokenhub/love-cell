@@ -74,6 +74,32 @@ describe('report', () => {
   });
 });
 
+describe('absent list', () => {
+  it('lists who was missing, leaving out people who had not come yet', () => {
+    const S = seed();
+    const r = reportText(S, S.services[3], true);
+    const lines = r.text.split('\n');
+    const i = lines.indexOf('*ABSENT (32)*');
+    expect(i).toBeGreaterThan(0);
+    const absent = lines.slice(i + 1);
+    expect(absent[0]).toBe('- Kezia');
+    expect(absent).toContain('- Theresa (from Ella)');
+    expect(absent).not.toContain('- Joy'); // came for the first time at this service
+    expect(absent).not.toContain('- Arnold (from Ella)');
+    expect(r.absent).toBe(32);
+  });
+
+  it('counts nobody absent at the very first service', () => {
+    const S = seed();
+    expect(reportText(S, S.services[0], true).absent).toBe(1); // only Ella, a leader
+  });
+
+  it('leaves the report as it was unless asked', () => {
+    const S = seed();
+    expect(reportText(S, S.services[3]).text).not.toContain('ABSENT');
+  });
+});
+
 describe('actions', () => {
   it('creates the next service when marking someone there', () => {
     const S = seed();

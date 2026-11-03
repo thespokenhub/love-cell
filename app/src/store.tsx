@@ -38,11 +38,13 @@ export interface UI {
   /** null = closed; otherwise the service chosen up front (undefined = default). */
   add: { svcId?: string } | null;
   feedback: boolean;
+  /** Home's people-at-each-service chart: split by new vs returning, or by whose people. */
+  svcMode: 'back' | 'owner';
 }
 
 const initialUI: UI = {
   tab: 'home', svcId: null, mf: 'all', q: '', pf: 'all', po: 'all', pq: '', pv: 'people', careTask: 'pray',
-  co: 'all', ftMode: 'week', personId: null, reportId: null, sheet: null, assignFor: null, meetingId: null, add: null, feedback: false,
+  co: 'all', ftMode: 'week', personId: null, reportId: null, sheet: null, assignFor: null, meetingId: null, add: null, feedback: false, svcMode: 'back',
 };
 
 interface Store {

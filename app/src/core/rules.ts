@@ -73,15 +73,32 @@ export function nextSlot(svcs: Service[], today: string): Slot {
   return { id: (type === 'MGS' ? 'M' : 'L') + d.replace(/-/g, ''), type, date: d, isNew: true };
 }
 
-export function reportText(S: Data, slot: Service): { text: string; count: number } {
+const LEADER_LINES: [string, string][] = [[FRED, '*SS - Fred Adzah'], [NELSON, '*CS - Nelson Ansah'], [ELLA, '*S - Emmanuella Lithur']];
+
+/** Who was missing from a service: everyone who was already part of the cell by then and hadn't stopped coming. */
+export function absentFrom(S: Data, slot: Service): Person[] {
   const set = new Set(S.att[slot.id] || []);
-  const L = ['*OASIS BACENTA ATTENDANCE*', `${slot.type === 'MGS' ? 'MGS' : 'LC LIVE'} - ${fmtSlash(slot.date)}`];
-  if (set.has(FRED)) L.push('*SS - Fred Adzah');
-  if (set.has(NELSON)) L.push('*CS - Nelson Ansah');
-  if (set.has(ELLA)) L.push('*S - Emmanuella Lithur');
-  S.people.filter(p => p.owner === 'Nelson' && set.has(p.id)).forEach(p => L.push('- ' + p.name));
-  S.people.filter(p => p.owner === 'Ella' && set.has(p.id)).forEach(p => L.push(`- ${p.name} (from Ella)`));
-  return { text: L.join('\n'), count: set.size };
+  const cameBefore = (id: string) => S.services.some(s => s.date < slot.date && (S.att[s.id] || []).includes(id));
+  return S.people.filter(p => !set.has(p.id) && (p.kind === 'leader' ||
+    ((!p.left || p.left > slot.date) && cameBefore(p.id))));
+}
+
+export function reportText(S: Data, slot: Service, withAbsent = false): { text: string; count: number; absent: number } {
+  const set = new Set(S.att[slot.id] || []);
+  const lines = (has: (id: string) => boolean, people: Person[]) => {
+    const L: string[] = [];
+    LEADER_LINES.forEach(([id, line]) => has(id) && L.push(line));
+    people.filter(p => p.owner === 'Nelson' && has(p.id)).forEach(p => L.push('- ' + p.name));
+    people.filter(p => p.owner === 'Ella' && has(p.id)).forEach(p => L.push(`- ${p.name} (from Ella)`));
+    return L;
+  };
+  const L = ['*OASIS BACENTA ATTENDANCE*', `${slot.type === 'MGS' ? 'MGS' : 'LC LIVE'} - ${fmtSlash(slot.date)}`, ...lines(id => set.has(id), S.people)];
+  const absent = absentFrom(S, slot);
+  if (withAbsent && absent.length) {
+    const ids = new Set(absent.map(p => p.id));
+    L.push('', `*ABSENT (${absent.length})*`, ...lines(id => ids.has(id), absent));
+  }
+  return { text: L.join('\n'), count: set.size, absent: absent.length };
 }
 
 export const dispName = (p: Person) => (p.id === ELLA ? 'Emmanuella Lithur (Ella)' : p.name);

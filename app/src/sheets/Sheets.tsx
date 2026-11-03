@@ -71,12 +71,20 @@ export function AddSheet() {
   );
 }
 
+const ABSENT_KEY = 'lovecell-report-absent';
+
 export function ReportSheet({ svcId }: { svcId: string }) {
   const { data, slots, set } = useStore();
   const [copied, setCopied] = useState(false);
+  // Remembered on this phone, so the choice sticks from one service to the next.
+  const [withAbsent, setWithAbsent] = useState(() => { try { return localStorage.getItem(ABSENT_KEY) !== 'off'; } catch { return true; } });
+  const flipAbsent = () => {
+    setWithAbsent(!withAbsent);
+    try { localStorage.setItem(ABSENT_KEY, withAbsent ? 'off' : 'on'); } catch { /* not saved; fine */ }
+  };
   const slot = slots.find(s => s.id === svcId);
   if (!slot) return null;
-  const r = reportText(data, slot);
+  const r = reportText(data, slot, withAbsent);
   const close = () => set({ reportId: null });
   const done = () => { setCopied(true); setTimeout(() => setCopied(false), 1800); };
   const copy = () => {
@@ -99,7 +107,14 @@ export function ReportSheet({ svcId }: { svcId: string }) {
           <div className="sheet-title">Report</div>
           <div className="sub">{SVC_NAME[slot.type]} · {fmtLong(slot.date)}</div>
         </div>
-        <div className="badge">{r.count} here</div>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <div className="badge">{r.count} here</div>
+          <div className="badge" style={{ background: C.track, color: C.muted }}>{r.absent} absent</div>
+        </div>
+      </div>
+      <div onClick={flipAbsent} className="tap" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ flex: 1, fontSize: 14 }}>Add who was absent</div>
+        <Switch on={withAbsent} color={C.ink} />
       </div>
       <div className="noscroll mono" style={{ maxHeight: 420, overflowY: 'auto', background: C.canvas, border: `1px solid ${C.line}`, borderRadius: 14, padding: 14, fontSize: 13, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{r.text}</div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
