@@ -1,4 +1,4 @@
-import { addDays, days, fmt, fmtSlash, wd, weekStart } from './dates';
+import { addDays, days, fmt, fmtSlashLong, wd, weekStart } from './dates';
 import { ELLA, FRED, NELSON } from './seed';
 import type { Data, Person, PersonView, Service, Slot, SvcType, Task } from './types';
 
@@ -73,8 +73,6 @@ export function nextSlot(svcs: Service[], today: string): Slot {
   return { id: (type === 'MGS' ? 'M' : 'L') + d.replace(/-/g, ''), type, date: d, isNew: true };
 }
 
-const LEADER_LINES: [string, string][] = [[FRED, '*SS - Fred Adzah'], [NELSON, '*CS - Nelson Ansah'], [ELLA, '*S - Emmanuella Lithur']];
-
 /** Who was missing from a service: everyone who was already part of the cell by then and hadn't stopped coming. */
 export function absentFrom(S: Data, slot: Service): Person[] {
   const set = new Set(S.att[slot.id] || []);
@@ -83,22 +81,78 @@ export function absentFrom(S: Data, slot: Service): Person[] {
     ((!p.left || p.left > slot.date) && cameBefore(p.id))));
 }
 
+/** Ella first, then Nelson's people, then Ella's people, in the order they were added. */
+const listOrder = (people: Person[]) => [
+  ...people.filter(p => p.id === ELLA),
+  ...people.filter(p => p.owner === 'Nelson'),
+  ...people.filter(p => p.owner === 'Ella'),
+];
+const numbered = (people: Person[]) => listOrder(people).map((p, i) => `${i + 1}. ${p.name}`);
+
+/** The attendance list, in the numbered style used in the Oasis WhatsApp group. */
 export function reportText(S: Data, slot: Service, withAbsent = false): { text: string; count: number; absent: number } {
   const set = new Set(S.att[slot.id] || []);
-  const lines = (has: (id: string) => boolean, people: Person[]) => {
-    const L: string[] = [];
-    LEADER_LINES.forEach(([id, line]) => has(id) && L.push(line));
-    people.filter(p => p.owner === 'Nelson' && has(p.id)).forEach(p => L.push('- ' + p.name));
-    people.filter(p => p.owner === 'Ella' && has(p.id)).forEach(p => L.push(`- ${p.name} (from Ella)`));
-    return L;
-  };
-  const L = ['*OASIS BACENTA ATTENDANCE*', `${slot.type === 'MGS' ? 'MGS' : 'LC LIVE'} - ${fmtSlash(slot.date)}`, ...lines(id => set.has(id), S.people)];
+  const here = S.people.filter(p => set.has(p.id));
+  const L = [
+    '*OASIS BACENTA ATTENDANCE*',
+    '',
+    `${slot.type === 'MGS' ? '🔥 *MGS*' : '💻 *LC LIVE*'} - ${fmtSlashLong(slot.date)}`,
+    '',
+  ];
+  if (set.has(FRED)) L.push('*SS - Fred Adzah*', '');
+  if (set.has(NELSON)) L.push('CS - Nelson Ansah');
+  L.push(...numbered(here));
   const absent = absentFrom(S, slot);
   if (withAbsent && absent.length) {
-    const ids = new Set(absent.map(p => p.id));
-    L.push('', `*ABSENT (${absent.length})*`, ...lines(id => ids.has(id), absent));
+    const named = absent.map(p => (p.id === FRED ? { ...p, name: 'Fred Adzah (SS)' } : p.id === NELSON ? { ...p, name: 'Nelson Ansah (CS)' } : p));
+    L.push('', `*ABSENT (${absent.length})*`, ...named.filter(p => p.kind === 'leader' && p.id !== ELLA).map(p => '- ' + p.name),
+      ...numbered(named.filter(p => p.kind !== 'leader' || p.id === ELLA)));
   }
   return { text: L.join('\n'), count: set.size, absent: absent.length };
+}
+
+export interface MgsCounts { shepherds: number; members: number; firstTimers: number; pastors: number; teens: number; total: number; bused?: number; own?: number }
+
+/** The numbers for the Mega Gathering Service report. Pastors and teens aren't in the app, so they're typed in and added to the total. */
+export function mgsCounts(S: Data, slot: Service): MgsCounts {
+  const set = new Set(S.att[slot.id] || []);
+  const here = S.people.filter(p => set.has(p.id));
+  const firstVisit = (id: string) => S.services.filter(s => (S.att[s.id] || []).includes(id)).map(s => s.date).sort()[0];
+  const shepherds = here.filter(p => p.kind === 'leader').length;
+  const firstTimers = here.filter(p => p.kind === 'first' && firstVisit(p.id) === slot.date).length;
+  const members = here.length - shepherds - firstTimers;
+  const x = slot.mgs || {};
+  const pastors = x.pastors || 0, teens = x.teens || 0;
+  const total = pastors + shepherds + members + firstTimers + teens;
+  return { shepherds, members, firstTimers, pastors, teens, total, bused: x.bused, own: x.bused != null ? Math.max(0, total - x.bused) : undefined };
+}
+
+export function mgsReportText(S: Data, slot: Service): string {
+  const n = mgsCounts(S, slot);
+  const x = slot.mgs || {};
+  const v = (k?: number) => (k == null ? '' : String(k));
+  return [
+    '*OASIS*',
+    'MEGA GATHERING SERVICE REPORT',
+    `DATE: ${fmtSlashLong(slot.date)}`,
+    `MC: ${x.mc || ''}`,
+    '',
+    '*JOINT SERVICE*',
+    `PASTORS - ${n.pastors}`,
+    `SHEPHERDS - ${n.shepherds}`,
+    `MEMBERS - ${n.members}`,
+    `FIRST TIMERS - ${n.firstTimers}`,
+    `TEENS - ${n.teens}`,
+    '',
+    `TOTAL ATTENDANCE - ${n.total}`,
+    '',
+    '',
+    'ORGANIZED BUSING/GATHERING REPORT',
+    `Num. OF PEOPLE BUSED TO SERVICE - ${v(n.bused)}`,
+    `Num. THAT CAME ON THEIR OWN - ${v(n.own)}`,
+    `Num. OF ORGANIZED BUSES - ${v(x.buses)}`,
+    `TOTAL COST OF BUSING - ${x.cost || ''}`,
+  ].join('\n');
 }
 
 export const dispName = (p: Person) => (p.id === ELLA ? 'Emmanuella Lithur (Ella)' : p.name);

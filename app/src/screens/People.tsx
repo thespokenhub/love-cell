@@ -105,7 +105,7 @@ function Helpers({ helpers }: { helpers: PersonView[] }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div style={{ fontSize: 13, color: C.muted, lineHeight: 1.45, padding: '0 2px' }}>
-        Old members who help you look after new people. See who they look after, how they are doing themselves, and who comes to shepherds' meetings.
+        People who help you look after new people. See who they look after, how they are doing themselves, and who comes to shepherds' meetings.
       </div>
       <div className="card list" style={{ padding: '4px 14px', display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0' }}>
@@ -152,9 +152,9 @@ function Helpers({ helpers }: { helpers: PersonView[] }) {
         );
       })}
       {helpers.length === 0 && (
-        <div className="card list" style={{ padding: 18, fontSize: 14, color: '#3A3934', lineHeight: 1.5 }}>No helpers yet. Make an old member a helper, then assign new people to them.</div>
+        <div className="card list" style={{ padding: 18, fontSize: 14, color: '#3A3934', lineHeight: 1.5 }}>No helpers yet. Make someone a helper, then assign new people to them.</div>
       )}
-      <div onClick={() => set({ sheet: 'pick' })} className="dashed-btn"><span>+</span>Make an old member a helper</div>
+      <div onClick={() => set({ sheet: 'pick' })} className="dashed-btn"><span>+</span>Make someone a helper</div>
     </div>
   );
 }

@@ -15,8 +15,11 @@ Most changes come from Nelson's feedback, sent from the app as a GitHub issue. R
 - After 8 weeks: 75%+ = Coming regularly, 40–74% = On and off, under 40% = Needs a follow-up.
 - Not seen for 21+ days = flagged (never Nelson).
 - First-timers per week counts people, not visits.
-- Report format: `*OASIS BACENTA ATTENDANCE*`, `LC LIVE - DD/MM/YY` or `MGS - DD/MM/YY`, then the leaders present, then Nelson's people, then Ella's people with " (from Ella)".
+- Attendance list (both services): `*OASIS BACENTA ATTENDANCE*`, `🔥 *MGS* - DD/MM/YYYY` or `💻 *LC LIVE* - DD/MM/YYYY`, `*SS - Fred Adzah*` and `CS - Nelson Ansah` if present, then a numbered list of full names: Ella first, then Nelson's people, then Ella's people. Optional `*ABSENT (n)*` list after it.
+- MGS also has the Mega Gathering Service report (`mgsReportText`): shepherds = leaders present, first timers = first-timers whose first visit was that service, members = everyone else present; pastors, teens, MC and busing are typed in and saved on the service.
+- Use full names for people from now on.
 - Seed totals (unit-tested): M11 = 17, L14 = 25, M18 = 28, L21 = 15; 40 first-timers.
+- Real data lives only on Nelson's phone. To change saved records (names, past attendance), add an update to `app/src/core/updates.ts`; never rely on the seed. Never remove or reorder existing updates.
 
 ## Writing
 Plain words everywhere, written for Nelson. No jargon, no settings screens. Buttons say what they do.

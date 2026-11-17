@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { addDays, fmt, fmtLong, fmtShort } from '../core/dates';
-import { addPerson, deleteMeeting, patchPerson, shiftMeeting, toggleMeeting } from '../core/actions';
-import { dispName, meetingPeople, reportText, SVC_NAME } from '../core/rules';
-import type { Owner } from '../core/types';
+import { addPerson, deleteMeeting, patchPerson, setMgs, shiftMeeting, toggleMeeting } from '../core/actions';
+import { dispName, meetingPeople, mgsCounts, mgsReportText, reportText, SVC_NAME } from '../core/rules';
+import type { MgsExtra, Owner } from '../core/types';
 import { useStore } from '../store';
 import { C, OWN, ownerOf } from '../theme';
-import { Av, Sheet, Switch, TickBox } from '../ui';
+import { Av, Seg, Sheet, Switch, TickBox } from '../ui';
 
 export function AddSheet() {
   const { data, c, today, slots, ui, set, commit, flash } = useStore();
@@ -45,7 +45,7 @@ export function AddSheet() {
         <div className="sheet-title">Add someone new</div>
         <div className="sub">Type their name, then pick whose person they are.</div>
       </div>
-      <input ref={inputRef} value={name} onChange={e => setName(e.target.value)} placeholder="Their name" autoComplete="off" autoCapitalize="words"
+      <input ref={inputRef} value={name} onChange={e => setName(e.target.value)} placeholder="Their full name" autoComplete="off" autoCapitalize="words"
         style={{ height: 52, borderRadius: 14, border: `1px solid ${C.line}`, background: C.canvas, padding: '0 14px', fontFamily: 'inherit', fontSize: 17, color: C.ink, outline: 'none' }} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <div className="label">MARK THEM AS HERE AT</div>
@@ -74,8 +74,9 @@ export function AddSheet() {
 const ABSENT_KEY = 'lovecell-report-absent';
 
 export function ReportSheet({ svcId }: { svcId: string }) {
-  const { data, slots, set } = useStore();
+  const { data, slots, set, commit } = useStore();
   const [copied, setCopied] = useState(false);
+  const [mode, setMode] = useState<'list' | 'mgs'>('list');
   // Remembered on this phone, so the choice sticks from one service to the next.
   const [withAbsent, setWithAbsent] = useState(() => { try { return localStorage.getItem(ABSENT_KEY) !== 'off'; } catch { return true; } });
   const flipAbsent = () => {
@@ -84,25 +85,40 @@ export function ReportSheet({ svcId }: { svcId: string }) {
   };
   const slot = slots.find(s => s.id === svcId);
   if (!slot) return null;
+  const isMgs = slot.type === 'MGS';
+  const showMgs = isMgs && mode === 'mgs';
   const r = reportText(data, slot, withAbsent);
+  const text = showMgs ? mgsReportText(data, slot) : r.text;
+  const n = mgsCounts(data, slot);
+  const x = slot.mgs || {};
+  const save = (patch: MgsExtra) => commit(setMgs(data, slot, patch));
+  const num = (v: string) => (v.trim() === '' ? undefined : Math.max(0, Math.floor(+v) || 0));
   const close = () => set({ reportId: null });
   const done = () => { setCopied(true); setTimeout(() => setCopied(false), 1800); };
   const copy = () => {
     const fallback = () => {
       const a = document.createElement('textarea');
-      a.value = r.text;
+      a.value = text;
       document.body.appendChild(a);
       a.select();
       try { document.execCommand('copy'); } catch { /* nothing else to try */ }
       a.remove();
       done();
     };
-    if (navigator.clipboard) navigator.clipboard.writeText(r.text).then(done, fallback);
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, fallback);
     else fallback();
   };
+  const field = (id: string, label: string, value: string | number | undefined, onChange: (v: string) => void, numeric = true) => (
+    <label key={id} htmlFor={id} style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+      <span className="label">{label}</span>
+      <input id={id} value={value ?? ''} onChange={e => onChange(e.target.value)} inputMode={numeric ? 'numeric' : 'text'}
+        style={{ height: 44, borderRadius: 12, border: `1px solid ${C.line}`, background: C.canvas, padding: '0 12px', fontFamily: 'inherit', fontSize: 16, color: C.ink, outline: 'none', minWidth: 0 }} />
+    </label>
+  );
+
   return (
-    <Sheet onClose={close} z={40} gap={14}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+    <Sheet onClose={close} z={40} gap={14} maxHeight="92%">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flex: 'none' }}>
         <div>
           <div className="sheet-title">Report</div>
           <div className="sub">{SVC_NAME[slot.type]} · {fmtLong(slot.date)}</div>
@@ -112,17 +128,34 @@ export function ReportSheet({ svcId }: { svcId: string }) {
           <div className="badge" style={{ background: C.track, color: C.muted }}>{r.absent} absent</div>
         </div>
       </div>
-      <div onClick={flipAbsent} className="tap" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{ flex: 1, fontSize: 14 }}>Add who was absent</div>
-        <Switch on={withAbsent} color={C.ink} />
+      {isMgs && <Seg fill style={{ flex: 'none' }} value={mode} onChange={setMode} options={[['list', 'Attendance list'], ['mgs', 'Service report']]} />}
+      <div className="noscroll" style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {showMgs ? <>
+          <div className="small" style={{ lineHeight: 1.45 }}>
+            From attendance: {n.shepherds} shepherds, {n.members} members and {n.firstTimers} first-timers. Fill in the rest; pastors and teens are added to the total.
+          </div>
+          {field('mgs-mc', 'MC', x.mc, v => save({ mc: v }), false)}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            {field('mgs-pastors', 'PASTORS', x.pastors, v => save({ pastors: num(v) }))}
+            {field('mgs-teens', 'TEENS', x.teens, v => save({ teens: num(v) }))}
+            {field('mgs-bused', 'BUSED TO SERVICE', x.bused, v => save({ bused: num(v) }))}
+            {field('mgs-buses', 'ORGANIZED BUSES', x.buses, v => save({ buses: num(v) }))}
+          </div>
+          {field('mgs-cost', 'TOTAL COST OF BUSING', x.cost, v => save({ cost: v }), false)}
+        </> : (
+          <div onClick={flipAbsent} className="tap" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ flex: 1, fontSize: 14 }}>Add who was absent</div>
+            <Switch on={withAbsent} color={C.ink} />
+          </div>
+        )}
+        <div className="mono" style={{ background: C.canvas, border: `1px solid ${C.line}`, borderRadius: 14, padding: 14, fontSize: 13, lineHeight: 1.6, whiteSpace: 'pre-wrap', flex: 'none' }}>{text}</div>
       </div>
-      <div className="noscroll mono" style={{ maxHeight: 420, overflowY: 'auto', background: C.canvas, border: `1px solid ${C.line}`, borderRadius: 14, padding: 14, fontSize: 13, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{r.text}</div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, flex: 'none' }}>
         <button onClick={copy} className="btn">{copied ? 'Copied ✓' : 'Copy'}</button>
-        <a href={'https://wa.me/?text=' + encodeURIComponent(r.text)} target="_blank" rel="noreferrer"
+        <a href={'https://wa.me/?text=' + encodeURIComponent(text)} target="_blank" rel="noreferrer"
           style={{ height: 50, borderRadius: 12, background: C.accent, color: C.ink, fontSize: 15, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>Send on WhatsApp</a>
       </div>
-      <div onClick={close} className="link-btn">Close</div>
+      <div onClick={close} className="link-btn" style={{ flex: 'none' }}>Close</div>
     </Sheet>
   );
 }
@@ -130,12 +163,13 @@ export function ReportSheet({ svcId }: { svcId: string }) {
 export function PickSheet() {
   const { data, c, set, commit, flash } = useStore();
   const close = () => set({ sheet: null });
-  const rows = c.people.filter(p => p.kind === 'old' && !p.helper && !p.left);
+  const rows = c.people.filter(p => p.kind !== 'leader' && !p.helper && !p.left)
+    .sort((a, b) => (a.kind === 'old' ? 0 : 1) - (b.kind === 'old' ? 0 : 1));
   return (
     <Sheet onClose={close} z={46} topMin={120} maxHeight={640}>
       <div>
         <div className="sheet-title">Make a helper</div>
-        <div className="sub">Pick an old member to help you look after new people.</div>
+        <div className="sub">Pick someone to help you look after new people. Old members are first.</div>
       </div>
       <div className="noscroll" style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
         {rows.map(p => {
@@ -146,13 +180,13 @@ export function PickSheet() {
               <Av name={p.name} o={o} size={34} radius={10} font={13} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 15, fontWeight: 500 }}>{p.name}</div>
-                <div className="small">{o.label} · {p.visits.length} of {c.svcs.length} services</div>
+                <div className="small">{o.label} · {p.kind === 'old' ? 'Old member' : 'New member'} · {p.visits.length} of {c.svcs.length} services</div>
               </div>
               <div style={{ fontSize: 13, fontWeight: 500, color: C.link }}>Make helper</div>
             </div>
           );
         })}
-        {rows.length === 0 && <div style={{ padding: '16px 0', fontSize: 14, color: C.muted }}>Every old member is already a helper.</div>}
+        {rows.length === 0 && <div style={{ padding: '16px 0', fontSize: 14, color: C.muted }}>Everyone is already a helper.</div>}
       </div>
       <div onClick={close} className="link-btn">Close</div>
     </Sheet>

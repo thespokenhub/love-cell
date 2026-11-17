@@ -17,6 +17,17 @@ export interface Service {
   id: string;
   type: SvcType;
   date: string;
+  /** MGS only: the figures for the Mega Gathering Service report that the app can't count. */
+  mgs?: MgsExtra;
+}
+
+export interface MgsExtra {
+  mc?: string;
+  pastors?: number;
+  teens?: number;
+  bused?: number;
+  buses?: number;
+  cost?: string;
 }
 
 export interface Meeting {
@@ -44,6 +55,8 @@ export interface Data {
   att: Record<string, string[]>;
   care?: Care;
   meetings?: Meeting[];
+  /** How many one-time updates (core/updates.ts) this data has had. */
+  v?: number;
 }
 
 /** A service that may not be recorded yet (the next one). */

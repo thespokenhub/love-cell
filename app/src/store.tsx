@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useMemo, useRef, useState, type
 import { localToday } from './core/dates';
 import { compute, nextSlot, type Computed } from './core/rules';
 import { seed } from './core/seed';
+import { applyUpdates } from './core/updates';
 import type { Data, Owner, Slot, Task } from './core/types';
 
 const KEY = 'lovecell-data-v1';
@@ -9,9 +10,14 @@ const KEY = 'lovecell-data-v1';
 function load(): Data {
   try {
     const S = JSON.parse(localStorage.getItem(KEY) || 'null');
-    if (S && S.people && S.services && S.att) return S;
+    if (S && S.people && S.services && S.att) return saved(applyUpdates(S));
   } catch { /* fall through to seed */ }
-  return seed();
+  return saved(applyUpdates(seed()));
+}
+
+function saved(S: Data): Data {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch { /* storage full or blocked */ }
+  return S;
 }
 
 export type Tab = 'home' | 'mark' | 'follow' | 'care' | 'people';

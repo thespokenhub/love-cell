@@ -97,7 +97,7 @@ export default function PersonPage({ p }: { p: PersonView }) {
           </div>
         )}
 
-        {p.kind === 'old' && !p.helper && !p.left && (
+        {!isLeader && !p.helper && !p.left && (
           <div onClick={() => { patch({ helper: true }); flash(p.name + ' is now a helper'); }} className="tap"
             style={{ height: 48, borderRadius: 14, background: C.ink, color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 600 }}>Make {name} a helper</div>
         )}

@@ -1,6 +1,6 @@
 // Pure updates: each takes the saved Data and returns a new copy.
 import { addDays, weekStart } from './dates';
-import type { Data, Meeting, Owner, Person, Slot, Task } from './types';
+import type { Data, Meeting, MgsExtra, Owner, Person, Slot, Task } from './types';
 
 const newId = (prefix: string) => prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
@@ -65,3 +65,9 @@ export const deleteMeeting = (S: Data, id: string): Data => ({
   ...S,
   meetings: (S.meetings || []).filter(m => m.id !== id),
 });
+
+/** Saves the typed-in MGS report figures on the service (recording the service if it's the next one). */
+export function setMgs(S: Data, slot: Slot, patch: MgsExtra): Data {
+  const T = withSvc(S, slot);
+  return { ...T, services: T.services.map(s => (s.id === slot.id ? { ...s, mgs: { ...s.mgs, ...patch } } : s)) };
+}

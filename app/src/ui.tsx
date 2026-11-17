@@ -51,7 +51,7 @@ export const Header = ({ eyebrow, title, sub, right }: { eyebrow: string; title:
 );
 
 export function Sheet({ onClose, children, z = 45, gap = 12, maxHeight, topMin = 80 }: {
-  onClose: () => void; children: ReactNode; z?: number; gap?: number; maxHeight?: number; topMin?: number;
+  onClose: () => void; children: ReactNode; z?: number; gap?: number; maxHeight?: number | string; topMin?: number;
 }) {
   return (
     <div className="overlay" style={{ zIndex: z }}>

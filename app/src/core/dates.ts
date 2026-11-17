@@ -19,7 +19,8 @@ export const fmtLong = (d: string) => `${WDL[wd(d)]} ${dayNum(d)} ${MOL[mo(d)]}`
 /** "21 Oct" */
 export const fmtShort = (d: string) => `${dayNum(d)} ${MO[mo(d)]}`;
 /** "21/10/26" */
-export const fmtSlash = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}/${d.slice(2, 4)}`;
+/** "21/10/2026" */
+export const fmtSlashLong = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}/${d.slice(0, 4)}`;
 export const weekdayShort = (d: string) => WD[wd(d)];
 
 export const days = (a: string, b: string) => Math.round((toMs(b) - toMs(a)) / DAY);

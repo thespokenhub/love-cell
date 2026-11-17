@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { addDays, dayNum, days, fmt, fmtShort, weekStart, weekdayShort } from '../core/dates';
 import { SVC_NAME } from '../core/rules';
 import type { Owner } from '../core/types';
@@ -6,13 +5,12 @@ import { cameBackOf, careSummary, firstTimers, pctOf } from '../derive';
 import { useStore } from '../store';
 import { C, OWN, ownerOf } from '../theme';
 import { Av, Progress } from '../ui';
-import { seed } from '../core/seed';
 import { careWeek } from './Care';
 import { useFollowCount } from './FollowUp';
 import { AfterEightCard, CameBackCard, NumberTiles } from './Numbers';
 
 export default function Home() {
-  const { data, c, today, next, ui, set, go, commit, flash } = useStore();
+  const { data, c, today, next, ui, set, go } = useStore();
   const { svcs, sets, people } = c;
   const firsts = firstTimers(c);
   const week = weekStart(today);
@@ -56,20 +54,6 @@ export default function Home() {
   const newP = firsts.filter(p => p.key === 'new')
     .sort((a, b) => (a.firstVisit! < b.firstVisit! ? -1 : a.firstVisit! > b.firstVisit! ? 1 : b.attended! - a.attended!));
 
-  // Wiping everything takes two taps: the first one asks.
-  const [sure, setSure] = useState(false);
-  useEffect(() => {
-    if (!sure) return;
-    const t = setTimeout(() => setSure(false), 4000);
-    return () => clearTimeout(t);
-  }, [sure]);
-  const reset = () => {
-    if (!sure) { setSure(true); return; }
-    setSure(false);
-    commit(seed());
-    set({ svcId: null, personId: null, reportId: null });
-    flash('Back to the 4 real services');
-  };
 
   return (
     <div className="page">
@@ -245,9 +229,6 @@ export default function Home() {
         })}
       </div>
       <div onClick={() => set({ feedback: true })} className="dashed-btn"><span>✎</span>Something to fix or add? Send feedback</div>
-      <div onClick={reset} className="tap" style={{ fontSize: 12, textAlign: 'center', padding: 8, textDecoration: 'underline', color: sure ? C.down : C.muted }}>
-        {sure ? 'Tap again to clear everything you added' : 'Start again from the 4 real services'}
-      </div>
     </div>
   );
 }

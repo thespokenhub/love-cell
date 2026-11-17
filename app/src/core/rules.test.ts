@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { weekStart } from './dates';
 import { addPerson, tick, toggleAttendance } from './actions';
-import { compute, followUp, nextSlot, reportText } from './rules';
+import { compute, followUp, mgsReportText, nextSlot, reportText } from './rules';
+import { applyUpdates } from './updates';
 import { seed } from './seed';
 
 const TODAY = '2026-10-23';
@@ -61,15 +62,15 @@ describe('later dates', () => {
 });
 
 describe('report', () => {
-  it('writes the LC Live 21 Oct report', () => {
+  it('writes the numbered list for LC Live 21 Oct', () => {
     const S = seed();
     const r = reportText(S, S.services[3]);
     const lines = r.text.split('\n');
-    expect(lines.slice(0, 5)).toEqual([
-      '*OASIS BACENTA ATTENDANCE*', 'LC LIVE - 21/10/26', '*SS - Fred Adzah', '*CS - Nelson Ansah', '*S - Emmanuella Lithur',
+    expect(lines.slice(0, 8)).toEqual([
+      '*OASIS BACENTA ATTENDANCE*', '', '💻 *LC LIVE* - 21/10/2026', '', '*SS - Fred Adzah*', '', 'CS - Nelson Ansah', '1. Emmanuella Lithur',
     ]);
-    expect(lines[5]).toBe('- Josephine');
-    expect(lines.at(-1)).toBe('- Arnold (from Ella)');
+    expect(lines[8]).toBe('2. Josephine');
+    expect(lines.at(-1)).toBe('13. Arnold');
     expect(r.count).toBe(15);
   });
 });
@@ -82,21 +83,82 @@ describe('absent list', () => {
     const i = lines.indexOf('*ABSENT (32)*');
     expect(i).toBeGreaterThan(0);
     const absent = lines.slice(i + 1);
-    expect(absent[0]).toBe('- Kezia');
-    expect(absent).toContain('- Theresa (from Ella)');
-    expect(absent).not.toContain('- Joy'); // came for the first time at this service
-    expect(absent).not.toContain('- Arnold (from Ella)');
+    expect(absent[0]).toBe('1. Kezia');
+    expect(absent).toContain('22. Theresa');
+    expect(absent.join('\n')).not.toMatch(/Joy|Arnold/); // both came for the first time at this service
     expect(r.absent).toBe(32);
   });
 
-  it('counts nobody absent at the very first service', () => {
+  it('counts only Ella absent at the very first service', () => {
     const S = seed();
-    expect(reportText(S, S.services[0], true).absent).toBe(1); // only Ella, a leader
+    expect(reportText(S, S.services[0], true).absent).toBe(1);
   });
 
   it('leaves the report as it was unless asked', () => {
     const S = seed();
     expect(reportText(S, S.services[3]).text).not.toContain('ABSENT');
+  });
+});
+
+describe('update 1: full names and November', () => {
+  const S = applyUpdates(seed());
+  const at = (date: string) => S.att[S.services.find(s => s.date === date)!.id];
+  const named = (n: string) => S.people.filter(p => p.name === n);
+
+  it('runs once', () => {
+    expect(S.v).toBe(1);
+    expect(applyUpdates(S)).toBe(S);
+  });
+
+  it('matches the November reports (plus Fred and Nelson)', () => {
+    expect(at('2026-11-01')).toHaveLength(24);
+    expect(at('2026-11-04')).toHaveLength(20);
+    expect(at('2026-11-08')).toHaveLength(25);
+    expect(at('2026-11-11')).toHaveLength(15);
+    expect(at('2026-11-15')).toHaveLength(24);
+  });
+
+  it('keeps the October totals', () => {
+    expect(['M11', 'L14', 'M18', 'L21'].map(id => S.att[id].length)).toEqual([17, 25, 28, 15]);
+  });
+
+  it('gives full names without making copies', () => {
+    expect(named('Deborah Amoakoah')).toHaveLength(1);
+    expect(named('Debbie')).toHaveLength(0);
+    expect(named('Abigail Ewusie')).toHaveLength(1);
+    expect(named('Vivian Tetteh')).toHaveLength(1);
+    expect(named('Gloria Vieira')[0].kind).toBe('old');
+    expect(named('Linda Ansomah')[0].owner).toBe('Ella');
+    expect(named('Judith Fafali')).toHaveLength(1);
+    expect(named('Judith Sowada')).toHaveLength(1);
+  });
+
+  it('marks the helpers and who they look after', () => {
+    const helpers = S.people.filter(p => p.helper).map(p => p.name);
+    expect(helpers).toHaveLength(12);
+    expect(helpers).toContain('Benedicta Dorvi');
+    expect(named('Benedicta Dorvi')[0].kind).toBe('first');
+    expect(named('Courage')[0].helperId).toBe(named('Lois Larbi')[0].id);
+    expect(named('Cecelia')[0].helperId).toBe(named('Abigail Ewusie')[0].id);
+  });
+
+  it('adds the camp-goers to 28 Oct when that day is saved', () => {
+    const withCamp = applyUpdates({ ...seed(), services: [...seed().services, { id: 'L20261028', type: 'LC', date: '2026-10-28' }], att: { ...seed().att, L20261028: ['p2', 'p4'] } });
+    const camp = withCamp.att.L20261028;
+    expect(camp).toContain('p4');
+    expect(camp).toHaveLength(8);
+  });
+
+  it('writes the MGS service report', () => {
+    const m = S.services.find(s => s.date === '2026-11-08')!;
+    const text = mgsReportText(S, { ...m, mgs: { mc: 'Lampo', bused: 17, buses: 1 } });
+    expect(text).toContain('DATE: 08/11/2026');
+    expect(text).toContain('MC: Lampo');
+    expect(text).toContain('SHEPHERDS - 3');
+    expect(text).toContain('FIRST TIMERS - 4'); // Adelaide, Derry, Emefa, Henrietta
+    expect(text).toContain('MEMBERS - 18');
+    expect(text).toContain('TOTAL ATTENDANCE - 25');
+    expect(text).toContain('Num. THAT CAME ON THEIR OWN - 8');
   });
 });
 
