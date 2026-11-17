@@ -106,7 +106,7 @@ describe('update 1: full names and November', () => {
   const named = (n: string) => S.people.filter(p => p.name === n);
 
   it('runs once', () => {
-    expect(S.v).toBe(1);
+    expect(S.v).toBe(2);
     expect(applyUpdates(S)).toBe(S);
   });
 
@@ -140,6 +140,12 @@ describe('update 1: full names and November', () => {
     expect(named('Benedicta Dorvi')[0].kind).toBe('first');
     expect(named('Courage')[0].helperId).toBe(named('Lois Larbi')[0].id);
     expect(named('Cecelia')[0].helperId).toBe(named('Abigail Ewusie')[0].id);
+  });
+
+  it('puts Henrietta Boateng with Ella (update 2), also on phones that already had update 1', () => {
+    expect(named('Henrietta Boateng')[0].owner).toBe('Ella');
+    const S1 = { ...S, v: 1, people: S.people.map(p => (p.name === 'Henrietta Boateng' ? { ...p, owner: 'Nelson' as const } : p)) };
+    expect(applyUpdates(S1).people.find(p => p.name === 'Henrietta Boateng')!.owner).toBe('Ella');
   });
 
   it('adds the camp-goers to 28 Oct when that day is saved', () => {

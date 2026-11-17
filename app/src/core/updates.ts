@@ -127,7 +127,12 @@ function update1(S: Data): Data {
   return { ...S, people, services, att };
 }
 
-const UPDATES = [update1];
+/** Update 2 (17 Nov 2026): Henrietta Boateng is one of Ella's people. */
+function update2(S: Data): Data {
+  return { ...S, people: S.people.map(p => (norm(p.name) === 'henrietta boateng' ? { ...p, owner: 'Ella' as Owner } : p)) };
+}
+
+const UPDATES = [update1, update2];
 
 /** Runs any updates this data hasn't had yet. Returns the same object when there's nothing to do. */
 export function applyUpdates(S: Data): Data {
