@@ -106,7 +106,7 @@ describe('update 1: full names and November', () => {
   const named = (n: string) => S.people.filter(p => p.name === n);
 
   it('runs once', () => {
-    expect(S.v).toBe(2);
+    expect(S.v).toBe(3);
     expect(applyUpdates(S)).toBe(S);
   });
 
@@ -118,8 +118,8 @@ describe('update 1: full names and November', () => {
     expect(at('2026-11-15')).toHaveLength(24);
   });
 
-  it('keeps the October totals', () => {
-    expect(['M11', 'L14', 'M18', 'L21'].map(id => S.att[id].length)).toEqual([17, 25, 28, 15]);
+  it('keeps the October totals (L14 is 24 once the two Josephines are one person)', () => {
+    expect(['M11', 'L14', 'M18', 'L21'].map(id => S.att[id].length)).toEqual([17, 24, 28, 15]);
   });
 
   it('gives full names without making copies', () => {
@@ -140,6 +140,42 @@ describe('update 1: full names and November', () => {
     expect(named('Benedicta Dorvi')[0].kind).toBe('first');
     expect(named('Courage')[0].helperId).toBe(named('Lois Larbi')[0].id);
     expect(named('Cecelia')[0].helperId).toBe(named('Abigail Ewusie')[0].id);
+  });
+
+  it('merges people added under short names, and the two Josephines (update 3)', () => {
+    // As on the phone: update 1 done, then people added by hand under short names on 25 Oct.
+    const S1 = applyUpdates({ ...seed(), v: 0 });
+    const base = { ...S1, v: 2 };
+    const m25 = { id: 'M20261025', type: 'MGS' as const, date: '2026-10-25' };
+    const extra = [
+      { id: 'x1', name: 'Justine 300', owner: 'Nelson' as const, kind: 'first' as const },
+      { id: 'x2', name: 'Vivian', owner: 'Nelson' as const, kind: 'first' as const },
+      { id: 'x3', name: 'Amariana', owner: 'Nelson' as const, kind: 'first' as const, helperId: null },
+    ];
+    const lois = base.people.find(p => p.name === 'Lois Larbi')!.id;
+    const phone = {
+      ...base,
+      people: [...base.people, ...extra, { id: 'x4', name: 'Kid', owner: 'Nelson' as const, kind: 'first' as const, helperId: 'x3' }],
+      services: [...base.services, m25],
+      att: { ...base.att, [m25.id]: ['p1', 'p2', 'x1', 'x2', 'x3', lois] },
+      care: { pray: { '2026-10-25': ['x2'] }, plan: ['x1'] },
+    };
+    const T = applyUpdates(phone);
+    const id = (n: string) => T.people.find(p => p.name === n)!.id;
+    expect(T.people.map(p => p.name)).not.toEqual(expect.arrayContaining(['Justine 300']));
+    expect(T.people.filter(p => /^(Vivian|Amariana|Justine)/.test(p.name)).map(p => p.name).sort()).toEqual(['Amariana Aggrey', 'Justine Sedi', 'Vivian Tetteh']);
+    expect(T.att[m25.id]).toEqual(expect.arrayContaining([id('Justine Sedi'), id('Vivian Tetteh'), id('Amariana Aggrey')]));
+    expect(T.care!.pray!['2026-10-25']).toEqual([id('Vivian Tetteh')]);
+    expect(T.care!.plan).toEqual([id('Justine Sedi')]);
+    expect(T.people.find(p => p.name === 'Kid')!.helperId).toBe(id('Amariana Aggrey'));
+    expect(T.people.find(p => p.name === 'Amariana Aggrey')!.helper).toBe(true);
+
+    // One Josephine Mamle, with both sets of visits; Ella's Josephine is untouched.
+    expect(T.people.filter(p => p.name === 'Josephine' && p.owner === 'Nelson')).toHaveLength(0);
+    expect(T.people.filter(p => p.name === 'Josephine' && p.owner === 'Ella')).toHaveLength(1);
+    const jm = id('Josephine Mamle');
+    expect(['M11', 'L14', 'M18', 'L21'].filter(s => T.att[s].includes(jm))).toEqual(['M11', 'L14', 'M18', 'L21']);
+    expect(['M11', 'L14', 'M18', 'L21'].map(s => T.att[s].length)).toEqual([17, 24, 28, 15]);
   });
 
   it('puts Henrietta Boateng with Ella (update 2), also on phones that already had update 1', () => {

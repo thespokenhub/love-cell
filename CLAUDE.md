@@ -18,7 +18,7 @@ Most changes come from Nelson's feedback, sent from the app as a GitHub issue. R
 - Attendance list (both services): `*OASIS BACENTA ATTENDANCE*`, `🔥 *MGS* - DD/MM/YYYY` or `💻 *LC LIVE* - DD/MM/YYYY`, `*SS - Fred Adzah*` and `CS - Nelson Ansah` if present, then a numbered list of full names: Ella first, then Nelson's people, then Ella's people. Optional `*ABSENT (n)*` list after it.
 - MGS also has the Mega Gathering Service report (`mgsReportText`): shepherds = leaders present, first timers = first-timers whose first visit was that service, members = everyone else present; pastors, teens, MC and busing are typed in and saved on the service.
 - Use full names for people from now on.
-- Seed totals (unit-tested): M11 = 17, L14 = 25, M18 = 28, L21 = 15; 40 first-timers.
+- Seed totals (unit-tested): M11 = 17, L14 = 25, M18 = 28, L21 = 15; 40 first-timers. After the updates L14 is 24: Nelson's "Josephine" and "Josephine Mamle" were the same person (merged in update 3).
 - Real data lives only on Nelson's phone. To change saved records (names, past attendance), add an update to `app/src/core/updates.ts`; never rely on the seed. Never remove or reorder existing updates.
 
 ## Writing

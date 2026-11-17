@@ -132,7 +132,52 @@ function update2(S: Data): Data {
   return { ...S, people: S.people.map(p => (norm(p.name) === 'henrietta boateng' ? { ...p, owner: 'Ella' as Owner } : p)) };
 }
 
-const UPDATES = [update1, update2];
+/** Moves everything recorded for `from` onto `into` (attendance, care ticks, meetings, helpers), then removes `from`. */
+function merge(S: Data, from: Person, into: Person): Data {
+  const swap = (l: string[]) => [...new Set(l.map(id => (id === from.id ? into.id : id)))];
+  const att: Data['att'] = {};
+  for (const [k, l] of Object.entries(S.att)) att[k] = swap(l);
+  const care: NonNullable<Data['care']> = {};
+  for (const [k, v] of Object.entries(S.care || {})) {
+    (care as Record<string, unknown>)[k] = Array.isArray(v) ? swap(v) : Object.fromEntries(Object.entries(v as Record<string, string[]>).map(([w, l]) => [w, swap(l)]));
+  }
+  const people = S.people.filter(p => p.id !== from.id).map(p => {
+    let q = p.helperId === from.id ? { ...p, helperId: into.id } : p;
+    if (q.id === into.id) q = { ...q, helper: q.helper || from.helper, helperId: q.helperId || (from.helperId !== into.id ? from.helperId : null) };
+    return q;
+  });
+  const meetings = S.meetings?.map(m => ({ ...m, present: swap(m.present) }));
+  return { ...S, people, att, care, ...(meetings ? { meetings } : {}) };
+}
+
+/** Merges every person `match` picks into the one called `into`. */
+function mergeInto(S: Data, into: string, match: (p: Person) => boolean): Data {
+  let T = S;
+  const target = () => T.people.find(p => norm(p.name) === norm(into));
+  for (const p of S.people.filter(p => match(p) && norm(p.name) !== norm(into))) {
+    const t = target();
+    if (t) T = merge(T, p, t);
+  }
+  return T;
+}
+
+/**
+ * Update 3 (17 Nov 2026): people added on the phone under short names, and a double.
+ * "Justine 300", "Vivian" and "Amariana" are Justine Sedi, Vivian Tetteh and Amariana Aggrey.
+ * Nelson's "Josephine" is Josephine Mamle.
+ */
+function update3(S: Data): Data {
+  // The first name alone, or followed only by numbers or brackets: "Justine", "Justine 300", "Justine (300)".
+  const short = (first: string) => (p: Person) => p.kind !== 'leader' && new RegExp(`^${first}[^a-z]*$`).test(norm(p.name));
+  let T = S;
+  T = mergeInto(T, 'Justine Sedi', short('justine'));
+  T = mergeInto(T, 'Vivian Tetteh', short('vivian'));
+  T = mergeInto(T, 'Amariana Aggrey', short('amariana'));
+  T = mergeInto(T, 'Josephine Mamle', p => p.owner === 'Nelson' && norm(p.name) === 'josephine');
+  return T;
+}
+
+const UPDATES = [update1, update2, update3];
 
 /** Runs any updates this data hasn't had yet. Returns the same object when there's nothing to do. */
 export function applyUpdates(S: Data): Data {
